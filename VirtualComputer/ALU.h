@@ -9,8 +9,8 @@ class ALU {
 public:
 	ALU(const Bus* CU, Bus* flag, Bus* output, const Bus* inputA, const Bus* inputB);
 
-	enum class CU_CODE {
-		ADD = 1, SUB, // a+b a-b
+	enum class CU_CODE : byte {
+		ADD = byte_min, SUB, // a+b a-b
 		MUL, DIV, // a*b a/b
 		NEG, MOD, // -a a%b
 		INC, DEC, // ++a --a

@@ -8,13 +8,11 @@ Register::Register(const Bus* input, Bus* output) : input(input), output(output)
 }
 
 void Register::enable() {
-	if(output)
-		output->bind(storage);
+	output->bind(storage);
 }
 
 void Register::set() {
-	if(input)
-		storage = input->extract();
+	storage = input->extract();
 }
 
 END_NS
