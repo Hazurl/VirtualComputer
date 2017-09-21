@@ -9,8 +9,11 @@
 #include "CPU.h"
 #include "Ram.h"
 #include "OutConsole.h"
+#include "MachineCode.h"
+#include "MachineCodeExample.h"
 
 #include <iostream>
+#include <vector>
 
 int main() {
 	using namespace NAMESPACE;
@@ -19,8 +22,18 @@ int main() {
 	Bus bus_addr;
 	Ram<> ram(&bus_data, &bus_addr);
 	OutConsole out(&bus_data);
-
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
+
+	MachineCode code = generate_fibonacci();
+	ubyte seg_instr, seg_stack;
+	byte linker[1] = { 9 };
+
+	ram.clean();
+	load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+
+	cpu.define_program(seg_instr, seg_stack);
+	cpu.start_program();
+
 	std::cin.get();
 	return 0;
 }

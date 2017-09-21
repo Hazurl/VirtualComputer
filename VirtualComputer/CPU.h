@@ -11,6 +11,8 @@ class CPU {
 public:
 	CPU(Bus* bus_data, Bus* bus_addr, MemoryControlFlow* ram, Processable* out);
 
+	void define_program(ubyte entry_point, ubyte segment_stack);
+	void start_program();
 
 private:
 

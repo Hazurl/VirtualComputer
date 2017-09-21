@@ -143,6 +143,8 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CU.h" />
+    <ClInclude Include="MachineCode.h" />
+    <ClInclude Include="MachineCodeExample.h" />
     <ClInclude Include="MemoryControlFlow.h" />
     <ClInclude Include="OutConsole.h" />
     <ClInclude Include="Processable.h" />
@@ -156,6 +158,7 @@
     <ClCompile Include="Bus.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CU.cpp" />
+    <ClCompile Include="MachineCode.cpp" />
     <ClCompile Include="OutConsole.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="stdafx.cpp">
