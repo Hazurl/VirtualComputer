@@ -1,11 +1,15 @@
 #include "stdafx.h"
 #include "CU.h"
-
+#include <iostream>
 BEGIN_NS
 
-CU::CU(Processable* alu, MemoryControlFlow * flag_reg, Bus * flag_bus, MemoryControlFlow * instr_reg, Bus * instr_bus, MemoryControlFlow * instrAddr_reg, Bus * ALU_bus, MemoryControlFlow * ALUres_reg, 
+CU::CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* mem_reg, MemoryControlFlow * flag_reg, 
+	   Bus * flag_bus, MemoryControlFlow * instr_reg, Bus * instr_bus, MemoryControlFlow * instrAddr_reg, Bus * ALU_bus, MemoryControlFlow * ALUres_reg,
 	   MemoryControlFlow * ALUtmp_reg, MemoryControlFlow * a_reg, MemoryControlFlow * b_reg, MemoryControlFlow * c_reg)
   : alu(alu),
+	out(out),
+	ram(ram),
+	mem_reg(mem_reg),
 	flag_reg(flag_reg),
 	flag_bus(flag_bus),
 	instr_reg(instr_reg),
@@ -22,6 +26,7 @@ CU::CU(Processable* alu, MemoryControlFlow * flag_reg, Bus * flag_bus, MemoryCon
 }
 
 void CU::process() {
+	loadInstr();
 	switch(static_cast<CU::OP>(instr_bus->extract())) {
 	case OP::ADD:
 		prepareALU_regab(ALU::CU_CODE::ADD);
@@ -84,32 +89,47 @@ void CU::process() {
 		break;
 
 	case OP::LOADA:
+		advanceInstrAddr();
+		fetchFromRam();
 		a_reg->read();
 		break;
 
 	case OP::LOADB:
+		advanceInstrAddr();
+		fetchFromRam();
 		b_reg->read();
 		break;
 
 	case OP::LOADC:
+		advanceInstrAddr();
+		fetchFromRam();
 		c_reg->read();
 		break;
 
 	case OP::OUTA:
 		a_reg->write();
+		out->process();
 		break;
 
 	case OP::OUTB:
 		b_reg->write();
+		out->process();
 		break;
 
 	case OP::OUTC:
 		c_reg->write();
+		out->process();
 		break;
 
+	case OP::END:
+		return;
+
 	default: 
+		std::cout << "Oups (" << (int)instr_bus->extract() << std::endl;
+		std::cin.get();
 		exit(1);
 	}
+	advanceInstrAddr();
 }
 
 
@@ -148,4 +168,24 @@ void CU::prepareALU_rega(ALU::CU_CODE code) {
 	ALUres_reg->write();
 	a_reg->read();
 }
+
+void CU::advanceInstrAddr() {
+	instrAddr_reg->write();
+	ALU_bus->bind(static_cast<byte>(ALU::CU_CODE::INC));
+	alu->process();
+	ALUres_reg->read_write();
+	instrAddr_reg->read();
+}
+
+void CU::fetchFromRam() {
+	instrAddr_reg->write();
+	mem_reg->read_write();
+	ram->write();
+}
+
+void CU::loadInstr() {
+	fetchFromRam();
+	instr_reg->read_write();
+}
+
 END_NS

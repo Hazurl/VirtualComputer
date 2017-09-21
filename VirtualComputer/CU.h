@@ -11,11 +11,13 @@ BEGIN_NS
 
 class CU : public Processable {
 public:
-	CU(Processable* alu, MemoryControlFlow* flag_reg, Bus* flag_bus, MemoryControlFlow* instr_reg, Bus* instr_bus, MemoryControlFlow* instrAddr_reg, Bus* ALU_bus, MemoryControlFlow* ALUres_reg, 
+	CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* mem_reg, MemoryControlFlow* flag_reg, 
+	   Bus* flag_bus, MemoryControlFlow* instr_reg, Bus* instr_bus, MemoryControlFlow* instrAddr_reg, Bus* ALU_bus, MemoryControlFlow* ALUres_reg,
 	   MemoryControlFlow* ALUtmp_reg, MemoryControlFlow* a_reg, MemoryControlFlow* b_reg, MemoryControlFlow* c_reg);
 
 	enum class OP : byte {
-		ADD = byte_min, SUB,
+		END = byte_min,
+		ADD, SUB,
 		MUL, DIV,
 		NEG, MOD,
 		INC, DEC,
@@ -42,7 +44,15 @@ private:
 	void prepareALU_rega(ALU::CU_CODE code);
 	void prepareALU_regc(ALU::CU_CODE code);
 
+	void advanceInstrAddr();
+	void loadInstr();
+	void fetchFromRam();
+
 	Processable* alu;
+	Processable* out;
+
+	MemoryControlFlow* ram;
+	MemoryControlFlow* mem_reg;
 
 	MemoryControlFlow* flag_reg;
 	Bus* flag_bus;

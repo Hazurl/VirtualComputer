@@ -9,12 +9,13 @@ BEGIN_NS
 
 class CPU {
 public:
-	CPU(Bus* bus_data);
+	CPU(Bus* bus_data, Bus* bus_addr, MemoryControlFlow* ram, Processable* out);
 
 
 private:
 
 	Bus* bus_data;
+	Bus* bus_addr;
 
 	Bus bus_instr;
 	Bus bus_ALURes;
@@ -23,6 +24,7 @@ private:
 	Bus bus_ALUFlag;
 	Bus bus_CUFlag;
 
+	Register reg_memory;
 	Register reg_a;
 	Register reg_b;
 	Register reg_c;

@@ -10,6 +10,11 @@ public:
 
 	virtual void read() = 0;
 	virtual void write() = 0;
+
+	void read_write() {
+		read();
+		write();
+	}
 };
 
 END_NS

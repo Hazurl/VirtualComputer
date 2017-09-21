@@ -7,21 +7,20 @@
 #include "Bus.h"
 #include "Register.h"
 #include "CPU.h"
+#include "Ram.h"
+#include "OutConsole.h"
 
 #include <iostream>
-
-#define dumb_bus \
-	std::cout << "\tCU_bus: " << static_cast<int>(CU_bus.extract()) << std::endl;\
-	std::cout << "\tIA_bus: " << static_cast<int>(IA_bus.extract()) << std::endl;\
-	std::cout << "\tIB_bus: " << static_cast<int>(IB_bus.extract()) << std::endl;\
-	std::cout << "\tO_bus: " << static_cast<int>(O_bus.extract()) << std::endl;\
-	std::cout << "\tflag_bus: " << static_cast<int>(flag_bus.extract()) << std::endl;
 
 int main() {
 	using namespace NAMESPACE;
 
 	Bus bus_data;
-	CPU cpu(&bus_data);
+	Bus bus_addr;
+	Ram<> ram(&bus_data, &bus_addr);
+	OutConsole out(&bus_data);
+
+	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 	std::cin.get();
 	return 0;
 }
