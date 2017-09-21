@@ -7,11 +7,11 @@ Register::Register(const Bus* input, Bus* output) : input(input), output(output)
 
 }
 
-void Register::enable() {
+void Register::write() {
 	output->bind(storage);
 }
 
-void Register::set() {
+void Register::read() {
 	storage = input->extract();
 }
 

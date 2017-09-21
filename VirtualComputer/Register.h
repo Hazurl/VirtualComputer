@@ -2,16 +2,17 @@
 
 #include "config.h"
 #include "Bus.h"
+#include "MemoryControlFlow.h"
 
 BEGIN_NS
 
-class Register {
+class Register : public MemoryControlFlow {
 public:
 
 	Register(const Bus* input, Bus* output);
 
-	void enable();
-	void set();
+	void read() override;
+	void write() override;
 
 private:
 

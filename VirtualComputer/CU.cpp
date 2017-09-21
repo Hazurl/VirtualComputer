@@ -3,8 +3,8 @@
 
 BEGIN_NS
 
-CU::CU(ALU* alu, Register * flag_reg, Bus * flag_bus, Register * instr_reg, Bus * instr_bus, Register * instrAddr_reg, Bus * ALU_bus, Register * ALUres_reg, 
-	   Register * ALUtmp_reg, Register * a_reg, Register * b_reg, Register * c_reg)
+CU::CU(Processable* alu, MemoryControlFlow * flag_reg, Bus * flag_bus, MemoryControlFlow * instr_reg, Bus * instr_bus, MemoryControlFlow * instrAddr_reg, Bus * ALU_bus, MemoryControlFlow * ALUres_reg, 
+	   MemoryControlFlow * ALUtmp_reg, MemoryControlFlow * a_reg, MemoryControlFlow * b_reg, MemoryControlFlow * c_reg)
   : alu(alu),
 	flag_reg(flag_reg),
 	flag_bus(flag_bus),
@@ -84,27 +84,27 @@ void CU::process() {
 		break;
 
 	case OP::LOADA:
-		a_reg->set();
+		a_reg->read();
 		break;
 
 	case OP::LOADB:
-		b_reg->set();
+		b_reg->read();
 		break;
 
 	case OP::LOADC:
-		c_reg->set();
+		c_reg->read();
 		break;
 
 	case OP::OUTA:
-		a_reg->enable();
+		a_reg->write();
 		break;
 
 	case OP::OUTB:
-		b_reg->enable();
+		b_reg->write();
 		break;
 
 	case OP::OUTC:
-		c_reg->enable();
+		c_reg->write();
 		break;
 
 	default: 
@@ -114,38 +114,38 @@ void CU::process() {
 
 
 void CU::prepareALU_regab(ALU::CU_CODE code) {
-	b_reg->enable();
-	ALUtmp_reg->set();
-	ALUtmp_reg->enable();
-	a_reg->enable();
+	b_reg->write();
+	ALUtmp_reg->read();
+	ALUtmp_reg->write();
+	a_reg->write();
 	ALU_bus->bind(static_cast<byte>(code));
 
 	alu->process();
 
-	ALUres_reg->set();
-	ALUres_reg->enable();
-	a_reg->set();
+	ALUres_reg->read();
+	ALUres_reg->write();
+	a_reg->read();
 }
 
 void CU::prepareALU_regc(ALU::CU_CODE code) {
-	c_reg->enable();
+	c_reg->write();
 	ALU_bus->bind(static_cast<byte>(code));
 
 	alu->process();
 
-	ALUres_reg->set();
-	ALUres_reg->enable();
-	c_reg->set();
+	ALUres_reg->read();
+	ALUres_reg->write();
+	c_reg->read();
 }
 
 void CU::prepareALU_rega(ALU::CU_CODE code) {
-	a_reg->enable();
+	a_reg->write();
 	ALU_bus->bind(static_cast<byte>(code));
 
 	alu->process();
 
-	ALUres_reg->set();
-	ALUres_reg->enable();
-	a_reg->set();
+	ALUres_reg->read();
+	ALUres_reg->write();
+	a_reg->read();
 }
 END_NS

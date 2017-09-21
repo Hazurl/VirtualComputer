@@ -2,10 +2,11 @@
 
 #include "config.h"
 #include "Bus.h"
+#include "Processable.h"
 
 BEGIN_NS
 
-class ALU {
+class ALU : public Processable {
 public:
 	ALU(const Bus* CU, Bus* flag, Bus* output, const Bus* inputA, const Bus* inputB);
 
@@ -28,7 +29,7 @@ public:
 
 	ubyte bit(FLAG_BIT b) const;
 
-	void process();
+	void process() override;
 
 private:
 

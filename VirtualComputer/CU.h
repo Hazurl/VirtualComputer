@@ -4,13 +4,15 @@
 #include "Bus.h"
 #include "Register.h"
 #include "ALU.h"
+#include "Processable.h"
+#include "MemoryControlFlow.h"
 
 BEGIN_NS
 
-class CU {
+class CU : public Processable {
 public:
-	CU(ALU* alu, Register* flag_reg, Bus* flag_bus, Register* instr_reg, Bus* instr_bus, Register* instrAddr_reg, Bus* ALU_bus, Register* ALUres_reg, 
-	   Register* ALUtmp_reg, Register* a_reg, Register* b_reg, Register* c_reg);
+	CU(Processable* alu, MemoryControlFlow* flag_reg, Bus* flag_bus, MemoryControlFlow* instr_reg, Bus* instr_bus, MemoryControlFlow* instrAddr_reg, Bus* ALU_bus, MemoryControlFlow* ALUres_reg, 
+	   MemoryControlFlow* ALUtmp_reg, MemoryControlFlow* a_reg, MemoryControlFlow* b_reg, MemoryControlFlow* c_reg);
 
 	enum class OP : byte {
 		ADD = byte_min, SUB,
@@ -32,7 +34,7 @@ public:
 		OUTC, // std::cout, debug !
 	};
 
-	void process();
+	void process() override;
 
 private:
 
@@ -40,22 +42,22 @@ private:
 	void prepareALU_rega(ALU::CU_CODE code);
 	void prepareALU_regc(ALU::CU_CODE code);
 
-	ALU* alu;
+	Processable* alu;
 
-	Register* flag_reg;
+	MemoryControlFlow* flag_reg;
 	Bus* flag_bus;
 	
-	Register* instr_reg;
+	MemoryControlFlow* instr_reg;
 	Bus* instr_bus;
-	Register* instrAddr_reg;
+	MemoryControlFlow* instrAddr_reg;
 
 	Bus* ALU_bus;
-	Register* ALUres_reg;
-	Register* ALUtmp_reg;
+	MemoryControlFlow* ALUres_reg;
+	MemoryControlFlow* ALUtmp_reg;
 
-	Register* a_reg;
-	Register* b_reg;
-	Register* c_reg;
+	MemoryControlFlow* a_reg;
+	MemoryControlFlow* b_reg;
+	MemoryControlFlow* c_reg;
 };
 
 END_NS

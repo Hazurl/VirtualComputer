@@ -18,43 +18,43 @@ CPU::CPU(Bus* bus_data) :
 	
 	// Put ... in A
 	bus_data->bind(static_cast<byte>(CU::OP::LOADA));
-	reg_instr.set();
-	reg_instr.enable();
+	reg_instr.read();
+	reg_instr.write();
 	bus_data->bind(6);
 	cu.process();
 
 	// Put ... in B
 	bus_data->bind(static_cast<byte>(CU::OP::LOADB));
-	reg_instr.set();
-	reg_instr.enable();
+	reg_instr.read();
+	reg_instr.write();
 	bus_data->bind(7);
 	cu.process();
 
 	// Out A
 	bus_data->bind(static_cast<byte>(CU::OP::OUTA));
-	reg_instr.set();
-	reg_instr.enable();
+	reg_instr.read();
+	reg_instr.write();
 	cu.process();
 
 	std::cout << "Register A: " << (int)bus_data->extract() << std::endl;
 
 	// Out b
 	bus_data->bind(static_cast<byte>(CU::OP::OUTB));
-	reg_instr.set();
-	reg_instr.enable();
+	reg_instr.read();
+	reg_instr.write();
 	cu.process();
 	std::cout << "Register B: " << (int)bus_data->extract() << std::endl;
 
 	// Put A + B in A
 	bus_data->bind(static_cast<byte>(CU::OP::MUL));
-	reg_instr.set();
-	reg_instr.enable();
+	reg_instr.read();
+	reg_instr.write();
 	cu.process();
 
 	// Out A
 	bus_data->bind(static_cast<byte>(CU::OP::OUTA));
-	reg_instr.set();
-	reg_instr.enable();
+	reg_instr.read();
+	reg_instr.write();
 	cu.process();
 
 	std::cout << "Register A: " << (int)bus_data->extract() << std::endl;
