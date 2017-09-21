@@ -28,7 +28,7 @@ CPU::CPU(Bus* bus_data, Bus* bus_addr, MemoryControlFlow* ram, Processable* out)
 	bus_data->bind(64);
 	reg_seg_stack.read();
 	
-	std::cout << "Start >> Calcul 6*7 + 42" << std::endl;
+	std::cout << "Start >> Fibonacci" << std::endl;
 	while(bus_data->extract() != static_cast<byte>(CU::OP::END))
 		cu.process();
 
