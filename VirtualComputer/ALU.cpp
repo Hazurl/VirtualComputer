@@ -144,6 +144,13 @@ void ALU::process() {
 		setflag(ALU::FLAG_BIT::Zero, res == 0);
 		break;
 	}
+	case CU_CODE::COMP0:
+	{
+		byte res = inputA->extract();
+		setflag(ALU::FLAG_BIT::Comp, res > 0);
+		setflag(ALU::FLAG_BIT::Zero, res == 0);
+		break;
+	}
 	default:
 		exit(1);
 	};

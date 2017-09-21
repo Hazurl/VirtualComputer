@@ -13,16 +13,19 @@ public:
 	Ram(Bus* bus_data, Bus* bus_addr)
 		: bus_data(bus_data), bus_addr(bus_addr) 
 	{
-		memory[0] = static_cast<byte>(CU::OP::LOADA);
-		memory[1] = 6;
-		memory[2] = static_cast<byte>(CU::OP::LOADB);
-		memory[3] = 7;
-		memory[4] = static_cast<byte>(CU::OP::MUL);
-		memory[5] = static_cast<byte>(CU::OP::LOADB);
-		memory[6] = 42;
-		memory[7] = static_cast<byte>(CU::OP::ADD);
-		memory[8] = static_cast<byte>(CU::OP::OUTA);
-		memory[9] = static_cast<byte>(CU::OP::END);
+		
+		memory[0] = static_cast<byte>(CU::OP::LOADB);
+		memory[1] = 0;
+		memory[2] = static_cast<byte>(CU::OP::LOADA);
+		memory[3] = 5;
+		memory[4] = static_cast<byte>(CU::OP::DEC);
+		memory[5] = static_cast<byte>(CU::OP::OUTA);
+		memory[6] = static_cast<byte>(CU::OP::COMP);
+		memory[7] = static_cast<byte>(CU::OP::JMPNE);
+		memory[8] = 11;
+		memory[9] = static_cast<byte>(CU::OP::JMP);
+		memory[10] = 4;
+		memory[11] = static_cast<byte>(CU::OP::END);
 	}
 	
 	void read() override {

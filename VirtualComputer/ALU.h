@@ -18,6 +18,7 @@ public:
 		LSHFT, RSHFT, // a<<1 a>>1
 		VLSHFT, VRSHFT, // a<<b a>>b
 		COMP, // a > b ? a == b ?
+		COMP0, // a > 0 ? a == 0 ?
 	};
 
 	enum class FLAG_BIT : ubyte {

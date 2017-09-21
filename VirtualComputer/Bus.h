@@ -32,7 +32,7 @@ public:
 	bit_t bit(ubyte b);
 
 private:
-	byte storage;
+	byte storage = 0;
 };
 
 END_NS

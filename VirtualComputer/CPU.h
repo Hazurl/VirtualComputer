@@ -33,6 +33,10 @@ private:
 	Register reg_ALUTmp;
 	Register reg_ALURes;
 	Register reg_flag;
+	Register reg_stack_ptr;
+
+	Register reg_seg_instr;
+	Register reg_seg_stack;
 
 	ALU alu;
 	CU cu;
