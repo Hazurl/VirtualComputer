@@ -159,7 +159,6 @@
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="CU.cpp" />
     <ClCompile Include="MachineCode.cpp" />
-    <ClCompile Include="OutConsole.cpp" />
     <ClCompile Include="Register.cpp" />
     <ClCompile Include="MachineCodeHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
