@@ -33,7 +33,7 @@ void CPU::define_program(ubyte entry_point, ubyte segment_stack) {
 }
 
 void CPU::start_program() {
-	while(bus_data->extract() != static_cast<byte>(CU::OP::END))
+	while(bus_data->extract() != bytev(InstrSet::Halt))
 		cu.process();
 }
 

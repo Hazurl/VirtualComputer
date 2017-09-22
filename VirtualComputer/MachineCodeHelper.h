@@ -22,6 +22,9 @@ public:
 	}
 
 	static MachineCode generate_fibonacci();
+	static MachineCode generate_counter();
+	static MachineCode generate_simple_counter();
+	static MachineCode generate_for_in_range();
 
 };
 

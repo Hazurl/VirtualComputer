@@ -24,9 +24,9 @@ int main() {
 	OutConsole<OutConsoleMode::Int, OutConsoleBetween::Space> out(&bus_data);
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 
-	MachineCode code = MachineCodeHelper::generate_fibonacci();
+	MachineCode code = MachineCodeHelper::generate_for_in_range();
 	ubyte seg_instr, seg_stack;
-	byte linker[1] = { 9 };
+	byte linker[] = { 10, 20 };
 
 	ram.clean();
 	MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
@@ -34,6 +34,7 @@ int main() {
 	cpu.define_program(seg_instr, seg_stack);
 	cpu.start_program();
 
+	std::cout << std::endl;
 	std::cin.get();
 	return 0;
 }

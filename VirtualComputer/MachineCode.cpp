@@ -44,7 +44,7 @@ std::vector<byte> MachineCode::generate(byte* linker) {
 	return gen;
 }
 
-void MachineCode::command(CU::OP cmd) {
+void MachineCode::command(InstrSet cmd) {
 	command(static_cast<byte>(cmd));
 }
 

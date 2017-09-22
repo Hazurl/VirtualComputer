@@ -12,143 +12,134 @@ ALU::ALU(const Bus* CU, Bus* flag, Bus* output, const Bus* inputA, const Bus* in
 }
 
 void ALU::process() {
-	switch(static_cast<ALU::CU_CODE>(CU->extract())) {
-	case CU_CODE::ADD:
+	switch(static_cast<ALUInstrSet>(CU->extract())) {
+	case ALUInstrSet::Add:
 	{
 		short a = static_cast<short>(inputA->extract());
 		short b = static_cast<short>(inputB->extract());
-		short r = a + b;
-		setflag(ALU::FLAG_BIT::Overflow, r > byte_max);
-		setflag(ALU::FLAG_BIT::Carry, r > byte_max);
-
-		output->bind(static_cast<byte>(r));
+		short res = a + b;
+		setflags(!res, res > 0, res > byte_max, res > byte_max);
+		output->bind(static_cast<byte>(res));
 		break;
 	}
-	case CU_CODE::SUB:
+	case ALUInstrSet::Sub:
 	{
 		short a = static_cast<short>(inputA->extract());
 		short b = static_cast<short>(inputB->extract());
-		short r = a - b;
-		setflag(ALU::FLAG_BIT::Overflow, r < byte_min);
-		setflag(ALU::FLAG_BIT::Carry, r >= byte_min);
-
-		output->bind(static_cast<byte>(r));
+		short res = a - b;
+		setflags(!res, res > 0, res < byte_min, res >= byte_min);
+		output->bind(static_cast<byte>(res));
 		break;
 	}
-	case CU_CODE::NEG:
+	case ALUInstrSet::Neg:
 	{
 		byte a = inputA->extract();
-		setflag(FLAG_BIT::Overflow, a == byte_min);
-		setflag(FLAG_BIT::Carry, a == byte_min);
-		output->bind(-a);
+		byte res = -a;
+		setflags(!res, res > 0, a == byte_min, a == byte_min);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::MUL:
+	case ALUInstrSet::Mul:
 	{
 		int a = static_cast<int>(inputA->extract());
 		int b = static_cast<int>(inputB->extract());
-		int r = a * b;
+		int res = a * b;
 
-		setflag(ALU::FLAG_BIT::Overflow, r > byte_max || r < byte_min);
-		setflag(ALU::FLAG_BIT::Carry, r > byte_max);
+		setflags(!res, res > 0, res > byte_max || res < byte_min, res > byte_max);
 
-		output->bind(static_cast<byte>(r));
+		output->bind(static_cast<byte>(res));
 		break;
 	}
-	case CU_CODE::DIV:
-	{
-		byte b = inputB->extract();
-		if(b == 0) {
-			setflag(ALU::FLAG_BIT::Overflow, 1);
-			setflag(ALU::FLAG_BIT::Carry, 1);
-			break;
-		}
-
-		setflag(ALU::FLAG_BIT::Overflow, 0);
-		setflag(ALU::FLAG_BIT::Carry, 0);
-		output->bind(inputA->extract() / b);
-		break;
-	}
-	case CU_CODE::MOD:
-	{
-		byte b = inputB->extract();
-		if(b == 0) {
-			setflag(ALU::FLAG_BIT::Overflow, 1);
-			setflag(ALU::FLAG_BIT::Carry, 1);
-			break;
-		}
-
-		setflag(ALU::FLAG_BIT::Overflow, 0);
-		setflag(ALU::FLAG_BIT::Carry, 0);
-		output->bind(inputA->extract() % b);
-		break;
-	}
-	case CU_CODE::INC:
+	case ALUInstrSet::Div:
 	{
 		byte a = inputA->extract();
-		setflag(ALU::FLAG_BIT::Overflow, a == byte_max);
-		setflag(ALU::FLAG_BIT::Carry, a == byte_max);
-		output->bind(a + 1);
+		byte b = inputB->extract();
+		if(b == 0) {
+			setflags(0, (a > 0) ^ (b > 0), 1, 1);
+			break;
+		}
+		byte res = a / b;
+		setflags(!res, res > 0, 0, 0);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::DEC:
+	case ALUInstrSet::Mod:
 	{
 		byte a = inputA->extract();
-		setflag(ALU::FLAG_BIT::Overflow, a == byte_min);
-		setflag(ALU::FLAG_BIT::Carry, a != byte_min);
-		output->bind(a - 1);
+		byte b = inputB->extract();
+		if(b == 0) {
+			setflags(0, (a > 0) ^ (b > 0), 1, 1);
+			break;
+		}
+		byte res = a % b;
+		setflags(!res, res > 0, 0, 0);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::LSHFT:
+	case ALUInstrSet::Inc:
+	{
+		byte a = inputA->extract();
+		byte res = a + 1;
+		setflags(!res, res > 0, a == byte_max, a == byte_max);
+		output->bind(res);
+		break;
+	}
+	case ALUInstrSet::Dec:
+	{
+		byte a = inputA->extract();
+		byte res = a - 1;
+		setflags(!res, res > 0, a == byte_min, a != byte_min);
+		output->bind(res);
+		break;
+	}
+	case ALUInstrSet::LShift:
 	{
 		byte a = inputA->extract();
 		bool ovf = a & (1 << 8);
-		setflag(ALU::FLAG_BIT::Overflow, ovf);
-		setflag(ALU::FLAG_BIT::Carry, ovf);
-		output->bind(a << 1);
+		byte res = a << 1;
+		setflags(!res, res > 0, ovf, ovf);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::RSHFT:
+	case ALUInstrSet::RShift:
 	{
 		byte a = inputA->extract();
+		byte res = a >> 1;
 		bool ovf = a & 1;
-		setflag(ALU::FLAG_BIT::Overflow, ovf);
-		setflag(ALU::FLAG_BIT::Carry, !ovf);
-		output->bind(a >> 1);
+		setflags(!res, res > 0, ovf, !ovf);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::VLSHFT:
+	case ALUInstrSet::VLShift:
 	{
 		byte a = inputA->extract();
 		byte b = inputB->extract();
+		byte res = a << b;
 		bool ovf = b > 8 || (a & ((~0) << b));
-		setflag(ALU::FLAG_BIT::Overflow, ovf);
-		setflag(ALU::FLAG_BIT::Carry, ovf);
-		output->bind(a << b);
+		setflags(!res, res > 0, ovf, ovf);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::VRSHFT:
+	case ALUInstrSet::VRShift:
 	{
 		byte a = inputA->extract();
 		byte b = inputB->extract();
+		byte res = a >> b;
 		bool ovf = b > 8 || (a & ~((~0) << b));
-		setflag(ALU::FLAG_BIT::Overflow, ovf);
-		setflag(ALU::FLAG_BIT::Carry, !ovf);
-		output->bind(a >> b);
+		setflags(!res, res > 0, ovf, !ovf);
+		output->bind(res);
 		break;
 	}
-	case CU_CODE::COMP:
+	case ALUInstrSet::Comp:
 	{
 		byte res = inputA->extract() - inputB->extract();
-		setflag(ALU::FLAG_BIT::Comp, res > 0);
-		setflag(ALU::FLAG_BIT::Zero, res == 0);
+		setflags(!res, res > 0, 0, 0);
 		break;
 	}
-	case CU_CODE::COMP0:
+	case ALUInstrSet::Comp0:
 	{
 		byte res = inputA->extract();
-		setflag(ALU::FLAG_BIT::Comp, res > 0);
-		setflag(ALU::FLAG_BIT::Zero, res == 0);
+		setflags(!res, res > 0, 0, 0);
 		break;
 	}
 	default:
@@ -156,12 +147,13 @@ void ALU::process() {
 	};
 }
 
-ubyte ALU::bit(ALU::FLAG_BIT b) const {
-	return static_cast<ubyte>(b);
-}
-
-void ALU::setflag(FLAG_BIT f, ubyte v) {
-	flag->bit(bit(f)) = v;
+void ALU::setflags(bool zero, bool comp, bool overflow, bool carry) {
+	flag->bind(
+		(zero		? bytev(ALUFlag::Zero)		: 0) |
+		(comp		? bytev(ALUFlag::Comp)		: 0) |
+		(overflow	? bytev(ALUFlag::Overflow)	: 0) |
+		(carry		? bytev(ALUFlag::Carry)		: 0)
+	);
 }
 
 END_NS

@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "CU.h"
+#include "InstrSet.h"
 
 #include <vector>
 #include <unordered_map>
@@ -14,7 +15,7 @@ public:
 	std::vector<byte> generate(byte* linker);
 
 	void command(byte cmd);
-	void command(CU::OP cmd);
+	void command(InstrSet cmd);
 	void link(byte id);
 	void label(byte id);
 	void go_to(byte label);

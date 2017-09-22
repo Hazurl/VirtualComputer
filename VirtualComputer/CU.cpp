@@ -4,297 +4,342 @@
 
 BEGIN_NS
 
-CU::CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* mem_reg, MemoryControlFlow * flag_reg, 
-	   Bus * flag_bus, MemoryControlFlow * instr_reg, Bus * instr_bus, MemoryControlFlow * instrAddr_reg, Bus * ALU_bus, MemoryControlFlow * ALUres_reg,
-	   MemoryControlFlow * ALUtmp_reg, MemoryControlFlow * a_reg, MemoryControlFlow * b_reg, MemoryControlFlow * c_reg,
-	   MemoryControlFlow* seg_instr_reg, MemoryControlFlow* seg_stack_reg, MemoryControlFlow* stack_ptr_reg)
+CU::CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* reg_mem, MemoryControlFlow * reg_flag,
+	   Bus * bus_flag, MemoryControlFlow * reg_instr, Bus * bus_instr, MemoryControlFlow * reg_instr_addr, Bus * bus_alu, MemoryControlFlow * reg_alu_res,
+	   MemoryControlFlow * reg_alu_tmp, MemoryControlFlow * reg_a, MemoryControlFlow * reg_b, MemoryControlFlow * reg_c,
+	   MemoryControlFlow* reg_seg_instr, MemoryControlFlow* reg_seg_stack, MemoryControlFlow* reg_stack_ptr)
   : alu(alu),
 	out(out),
 	ram(ram),
-	mem_reg(mem_reg),
-	flag_reg(flag_reg),
-	flag_bus(flag_bus),
-	instr_reg(instr_reg),
-	instr_bus(instr_bus),
-	instrAddr_reg(instrAddr_reg),
-	ALU_bus(ALU_bus),
-	ALUres_reg(ALUres_reg),
-	ALUtmp_reg(ALUtmp_reg),
-	a_reg(a_reg),
-	b_reg(b_reg),
-	c_reg(c_reg),
-	seg_instr_reg(seg_instr_reg),
-	seg_stack_reg(seg_stack_reg),
-	stack_ptr_reg(stack_ptr_reg)
+	reg_mem(reg_mem),
+	reg_flag(reg_flag),
+	bus_flag(bus_flag),
+	reg_instr(reg_instr),
+	bus_instr(bus_instr),
+	reg_instr_addr(reg_instr_addr),
+	bus_alu(bus_alu),
+	reg_alu_res(reg_alu_res),
+	reg_alu_tmp(reg_alu_tmp),
+	reg_a(reg_a),
+	reg_b(reg_b),
+	reg_c(reg_c),
+	reg_seg_instr(reg_seg_instr),
+	reg_seg_stack(reg_seg_stack),
+	reg_stack_ptr(reg_stack_ptr)
 {
 
 }
 
 void CU::process() {
-	loadInstr();
-	switch(static_cast<CU::OP>(instr_bus->extract())) {
-	case OP::ADD:
-		prepareALU_regab(ALU::CU_CODE::ADD);
-		advanceInstrAddr();
+	fetch();
+	switch(static_cast<InstrSet>(bus_instr->extract())) {
+	case InstrSet::Jmp:
+		instrAddrForward();
+		jmp_if(true);
+		break;
+	case InstrSet::Jmpz:
+		instrAddrForward();
+		jmp_if( is_flag(ALUFlag::Zero) );
+		break;
+	case InstrSet::Jmpnz:
+		instrAddrForward();
+		jmp_if( is_not_flag(ALUFlag::Zero) );
+		break;
+	case InstrSet::Jmpg:
+		instrAddrForward();
+		jmp_if( is_flag(ALUFlag::Comp) );
+		break;
+	case InstrSet::Jmpgz:
+		instrAddrForward();
+		jmp_if( is_flag(ALUFlag::Comp) || is_flag(ALUFlag::Zero) );
+		break;
+	case InstrSet::Jmpl:
+		instrAddrForward();
+		jmp_if( is_not_flag(ALUFlag::Comp) && is_not_flag(ALUFlag::Zero) );
+		break;
+	case InstrSet::Jmplz:
+		instrAddrForward();
+		jmp_if( is_not_flag(ALUFlag::Comp) );
 		break;
 
-	case OP::SUB:
-		prepareALU_regab(ALU::CU_CODE::SUB);
-		advanceInstrAddr();
+	case InstrSet::Add_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::Add, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::Sub_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::Sub, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::Mul_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::Mul, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::Div_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::Div, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::Mod_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::Mod, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::LShift_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::VLShift, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::RShift_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::VRShift, reg_a);
+		instrAddrForward();
+		break;
+	case InstrSet::Comp_ab:
+		processALU(reg_a, reg_b, ALUInstrSet::Comp);
+		instrAddrForward();
+		break;
+	case InstrSet::Move_ab:
+		reg_a->write();
+		reg_b->read();
+		instrAddrForward();
+		break;
+	case InstrSet::Move_ba:
+		reg_b->write();
+		reg_a->read();
+		instrAddrForward();
 		break;
 
-	case OP::MUL:
-		prepareALU_regab(ALU::CU_CODE::MUL);
-		advanceInstrAddr();
+	case InstrSet::Inc_a:
+		processALU(reg_a, ALUInstrSet::Inc, reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::DIV:
-		prepareALU_regab(ALU::CU_CODE::DIV);
-		advanceInstrAddr();
+	case InstrSet::Dec_a:
+		processALU(reg_a, ALUInstrSet::Dec, reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::MOD:
-		prepareALU_regab(ALU::CU_CODE::MOD);
-		advanceInstrAddr();
+	case InstrSet::Neg_a:
+		processALU(reg_a, ALUInstrSet::Neg, reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::VLSHFT:
-		prepareALU_regab(ALU::CU_CODE::VLSHFT);
-		advanceInstrAddr();
+	case InstrSet::LShift_a:
+		processALU(reg_a, ALUInstrSet::LShift, reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::VRSHFT:
-		prepareALU_regab(ALU::CU_CODE::VRSHFT);
-		advanceInstrAddr();
+	case InstrSet::RShift_a:
+		processALU(reg_a, ALUInstrSet::RShift, reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::COMP:
-		prepareALU_regab(ALU::CU_CODE::COMP, false);
-		advanceInstrAddr();
+	case InstrSet::Comp0_a:
+		processALU(reg_a, ALUInstrSet::Comp0);
+		instrAddrForward();
 		break;
-
-	case OP::NEG:
-		prepareALU_rega(ALU::CU_CODE::NEG);
-		advanceInstrAddr();
+	case InstrSet::Push_a:
+		push(reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::INC:
-		prepareALU_rega(ALU::CU_CODE::INC);
-		advanceInstrAddr();
+	case InstrSet::Pop_a:
+		pop(reg_a);
+		instrAddrForward();
 		break;
-
-	case OP::DEC:
-		prepareALU_rega(ALU::CU_CODE::DEC);
-		advanceInstrAddr();
+	case InstrSet::Load_a:
+		instrAddrForward();
+		fetch();
+		reg_a->read();
+		instrAddrForward();
 		break;
-
-	case OP::RSHFT:
-		prepareALU_rega(ALU::CU_CODE::RSHFT);
-		advanceInstrAddr();
+	case InstrSet::LoadRel_a:
+		instrAddrForward();
+		fetch();
+		reg_mem->read_write();
+		fetch();
+		reg_a->read();
+		instrAddrForward();
 		break;
-
-	case OP::LSHFT:
-		prepareALU_rega(ALU::CU_CODE::LSHFT);
-		advanceInstrAddr();
+	case InstrSet::Store_a:
+		instrAddrForward();
+		fetch();
+		reg_mem->read_write();
+		reg_a->write();
+		ram->read();
+		instrAddrForward();
 		break;
-
-	case OP::DECCOUNTER:
-		prepareALU_regc(ALU::CU_CODE::DEC);
-		advanceInstrAddr();
-		break;
-
-	case OP::INCCOUNTER:
-		prepareALU_regc(ALU::CU_CODE::INC);
-		advanceInstrAddr();
-		break;
-
-	case OP::COMPC0:
-		prepareALU_regc(ALU::CU_CODE::COMP0, false);
-		advanceInstrAddr();
-		break;
-
-	case OP::LOADA:
-		advanceInstrAddr();
-		fetchFromRam();
-		a_reg->read();
-		advanceInstrAddr();
-		break;
-
-	case OP::LOADB:
-		advanceInstrAddr();
-		fetchFromRam();
-		b_reg->read();
-		advanceInstrAddr();
-		break;
-
-	case OP::LOADC:
-		advanceInstrAddr();
-		fetchFromRam();
-		c_reg->read();
-		advanceInstrAddr();
-		break;
-
-	case OP::PUSHA:
-		push(a_reg);
-		advanceInstrAddr();
-		break;
-
-	case OP::PUSHB:
-		push(b_reg);
-		advanceInstrAddr();
-		break;
-
-	case OP::PUSHC:
-		push(c_reg);
-		advanceInstrAddr();
-		break;
-
-	case OP::POPA:
-		pop(a_reg);
-		advanceInstrAddr();
-		break;
-
-	case OP::POPB:
-		pop(b_reg);
-		advanceInstrAddr();
-		break;
-
-	case OP::POPC:
-		pop(c_reg);
-		advanceInstrAddr();
-		break;
-
-	case OP::OUTA:
-		a_reg->write();
+	case InstrSet::Out_a:
+		reg_a->write();
 		out->process();
-		advanceInstrAddr();
+		instrAddrForward();
 		break;
 
-	case OP::OUTB:
-		b_reg->write();
+	case InstrSet::Inc_b:
+		processALU(reg_b, ALUInstrSet::Inc, reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::Dec_b:
+		processALU(reg_b, ALUInstrSet::Dec, reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::Neg_b:
+		processALU(reg_b, ALUInstrSet::Neg, reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::LShift_b:
+		processALU(reg_b, ALUInstrSet::LShift, reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::RShift_b:
+		processALU(reg_b, ALUInstrSet::RShift, reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::Comp0_b:
+		processALU(reg_b, ALUInstrSet::Comp0);
+		instrAddrForward();
+		break;
+	case InstrSet::Push_b:
+		push(reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::Pop_b:
+		pop(reg_b);
+		instrAddrForward();
+		break;
+	case InstrSet::Load_b:
+		instrAddrForward();
+		fetch();
+		reg_b->read();
+		instrAddrForward();
+		break;
+	case InstrSet::LoadRel_b:
+		instrAddrForward();
+		fetch();
+		reg_mem->read_write();
+		fetch();
+		reg_b->read();
+		instrAddrForward();
+		break;
+	case InstrSet::Store_b:
+		instrAddrForward();
+		fetch();
+		reg_mem->read_write();
+		reg_b->write();
+		ram->read();
+		instrAddrForward();
+		break;
+	case InstrSet::Out_b:
+		reg_b->write();
 		out->process();
-		advanceInstrAddr();
+		instrAddrForward();
 		break;
 
-	case OP::OUTC:
-		c_reg->write();
+	case InstrSet::Inc_c:
+		processALU(reg_c, ALUInstrSet::Inc, reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::Dec_c:
+		processALU(reg_c, ALUInstrSet::Dec, reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::Neg_c:
+		processALU(reg_c, ALUInstrSet::Neg, reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::LShift_c:
+		processALU(reg_c, ALUInstrSet::LShift, reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::RShift_c:
+		processALU(reg_c, ALUInstrSet::RShift, reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::Comp0_c:
+		processALU(reg_c, ALUInstrSet::Comp0);
+		instrAddrForward();
+		break;
+	case InstrSet::Push_c:
+		push(reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::Pop_c:
+		pop(reg_c);
+		instrAddrForward();
+		break;
+	case InstrSet::Load_c:
+		instrAddrForward();
+		fetch();
+		reg_c->read();
+		instrAddrForward();
+		break;
+	case InstrSet::LoadRel_c:
+		instrAddrForward();
+		fetch();
+		reg_mem->read_write();
+		fetch();
+		reg_c->read();
+		instrAddrForward();
+		break;
+	case InstrSet::Store_c:
+		instrAddrForward();
+		fetch();
+		reg_mem->read_write();
+		reg_c->write();
+		ram->read();
+		instrAddrForward();
+		break;
+	case InstrSet::Out_c:
+		reg_c->write();
 		out->process();
-		advanceInstrAddr();
+		instrAddrForward();
 		break;
 
-	case OP::JMP:
-		advanceInstrAddr();
-		fetchFromRam();
-		instrAddr_reg->read();
-		break;
-
-	case OP::JMPEQ:
-		advanceInstrAddr();
-		jmp_if(is_flag(ALU::FLAG_BIT::Zero));
-		break;
-
-	case OP::JMPNE:
-		advanceInstrAddr();
-		jmp_if(is_not_flag(ALU::FLAG_BIT::Zero));
-		break;
-
-	case OP::JMPL:
-		advanceInstrAddr();
-		jmp_if(is_not_flag(ALU::FLAG_BIT::Comp) && is_not_flag(ALU::FLAG_BIT::Zero));
-		break;
-
-	case OP::JMPLE:
-		advanceInstrAddr();
-		jmp_if(is_flag(ALU::FLAG_BIT::Zero) || is_not_flag(ALU::FLAG_BIT::Comp));
-		break;
-
-	case OP::JMPG:
-		advanceInstrAddr();
-		jmp_if(is_flag(ALU::FLAG_BIT::Comp));
-		break;
-
-	case OP::JMPGE:
-		advanceInstrAddr();
-		jmp_if(is_flag(ALU::FLAG_BIT::Comp) || is_flag(ALU::FLAG_BIT::Zero));
-		break;
-
-	case OP::END:
+	case InstrSet::Halt:
 		break;
 
 	default: 
-		std::cout << "Oups (unknown code: " << (int)instr_bus->extract() << ")"<< std::endl;
+		std::cout << "Oups (unknown code: " << (int)bus_instr->extract() << ")"<< std::endl;
 		std::cin.get();
 		exit(1);
 	}
 }
 
-
-void CU::prepareALU_regab(ALU::CU_CODE code, bool res_to_a) {
-	b_reg->write();
-	ALUtmp_reg->read_write();
-	a_reg->write();
-	ALU_bus->bind(static_cast<byte>(code));
-
-	alu->process();
-	flag_reg->read_write();
-
-	ALUres_reg->read_write();
-	if(res_to_a)
-		a_reg->read();
+void CU::prepareALU(MemoryControlFlow* a, MemoryControlFlow* b) {
+	b->write();
+	reg_alu_tmp->read_write();
+	a->write();
 }
 
-void CU::prepareALU_regc(ALU::CU_CODE code, bool res_to_c) {
-	c_reg->write();
-	ALU_bus->bind(static_cast<byte>(code));
-
-	alu->process();
-	flag_reg->read_write();
-
-	ALUres_reg->read_write();
-	if(res_to_c)
-		c_reg->read();
+void CU::prepareALU(MemoryControlFlow* a) {
+	a->write();
 }
 
-void CU::prepareALU_rega(ALU::CU_CODE code, bool res_to_a) {
-	a_reg->write();
-	ALU_bus->bind(static_cast<byte>(code));
-
+void CU::callALU(ALUInstrSet instr) {
+	bus_alu->bind(bytev(instr));
 	alu->process();
-	flag_reg->read_write();
-
-	ALUres_reg->read_write();
-	if (res_to_a)
-		a_reg->read();
+	reg_flag->read_write();
 }
 
-void CU::advanceInstrAddr() {
-	instrAddr_reg->write();
-	ALU_bus->bind(static_cast<byte>(ALU::CU_CODE::INC));
-	alu->process();
-	ALUres_reg->read_write();
-	instrAddr_reg->read();
+void CU::ALURes_to(MemoryControlFlow* a) {
+	reg_alu_res->read_write();
+	a->read();
 }
 
-void CU::fetchFromRam() {
-	instrAddr_reg->write();
-	mem_reg->read_write();
+void CU::instrAddrForward() {
+	reg_instr_addr->write();
+	bus_alu->bind(bytev(ALUInstrSet::Inc));
+	alu->process();
+	reg_alu_res->read_write();
+	reg_instr_addr->read();
+}
+
+void CU::fetch() {
+	reg_instr_addr->write();
+	reg_mem->read_write();
 	ram->write();
-}
-
-void CU::loadInstr() {
-	fetchFromRam();
-	instr_reg->read_write();
+	reg_instr->read_write();
 }
 
 void CU::push(MemoryControlFlow* reg) {
 	// write to addr bus
-	seg_stack_reg->write();
-	mem_reg->read_write();
+	reg_seg_stack->write();
+	reg_mem->read_write();
 	// inc stack_ptr
-	ALU_bus->bind(static_cast<byte>(ALU::CU_CODE::INC));
+	bus_alu->bind(bytev(ALUInstrSet::Inc));
 	alu->process();
-	ALUres_reg->read_write();
-	seg_stack_reg->read();
+	reg_alu_res->read_write();
+	reg_seg_stack->read();
 	// write to ram
 	reg->write();
 	ram->read();
@@ -302,13 +347,13 @@ void CU::push(MemoryControlFlow* reg) {
 
 void CU::pop(MemoryControlFlow* reg) {
 	// dec stack_ptr
-	seg_stack_reg->write();
-	ALU_bus->bind(static_cast<byte>(ALU::CU_CODE::DEC));
+	reg_seg_stack->write();
+	bus_alu->bind(bytev(ALUInstrSet::Dec));
 	alu->process();
-	ALUres_reg->read_write();
-	seg_stack_reg->read();
+	reg_alu_res->read_write();
+	reg_seg_stack->read();
 	// write to addr bus
-	mem_reg->read_write();
+	reg_mem->read_write();
 	// read from ram
 	ram->write();
 	reg->read();
@@ -316,18 +361,18 @@ void CU::pop(MemoryControlFlow* reg) {
 
 void CU::jmp_if(bool value) {
 	if(value) {
-		fetchFromRam();
-		instrAddr_reg->read();
+		fetch();
+		reg_instr_addr->read();
 	} else {
-		advanceInstrAddr();
+		instrAddrForward();
 	}
 }
 
-bool CU::is_flag(ALU::FLAG_BIT f) {
-	return (flag_bus->extract() & (1 << static_cast<byte>(f))) != 0;
+bool CU::is_flag(ALUFlag f) {
+	return (bus_flag->extract() & bytev(f)) != 0;
 }
 
-bool CU::is_not_flag(ALU::FLAG_BIT f) {
+bool CU::is_not_flag(ALUFlag f) {
 	return !is_flag(f);
 }
 

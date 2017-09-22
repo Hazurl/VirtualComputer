@@ -4,6 +4,13 @@
 
 BEGIN_NS
 
+enum class ALUFlag : byte {
+	Zero		= 1 << 0, 
+	Comp		= 1 << 1, 
+	Overflow	= 1 << 2, 
+	Carry		= 1 << 3,
+};
+
 enum class ALUInstrSet : ubyte {
 	Add,		// 2 arg : a + b
 	Sub,		// 2 arg : a - b
@@ -22,7 +29,7 @@ enum class ALUInstrSet : ubyte {
 };
 
 enum class InstrSet : ubyte {
-	HALT = 0,
+	Halt = 0,
 
 	// Operation on flag
 	Jmp,
@@ -93,6 +100,10 @@ inline byte bytev(InstrSet s) {
 }
 
 inline byte bytev(ALUInstrSet s) {
+	return static_cast<byte>(s);
+}
+
+inline byte bytev(ALUFlag s) {
 	return static_cast<byte>(s);
 }
 

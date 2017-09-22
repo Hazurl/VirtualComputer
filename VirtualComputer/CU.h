@@ -6,53 +6,53 @@
 #include "ALU.h"
 #include "Processable.h"
 #include "MemoryControlFlow.h"
+#include "InstrSet.h"
 
 BEGIN_NS
 
 class CU : public Processable {
 public:
-	CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* mem_reg, MemoryControlFlow* flag_reg, 
-	   Bus* flag_bus, MemoryControlFlow* instr_reg, Bus* instr_bus, MemoryControlFlow* instrAddr_reg, Bus* ALU_bus, MemoryControlFlow* ALUres_reg,
-	   MemoryControlFlow* ALUtmp_reg, MemoryControlFlow* a_reg, MemoryControlFlow* b_reg, MemoryControlFlow* c_reg,
-	   MemoryControlFlow* seg_instr_reg, MemoryControlFlow* seg_stack_reg, MemoryControlFlow* stack_ptr_reg);
-
-	enum class OP : byte {
-		END = byte_min,
-		ADD, SUB,
-		MUL, DIV,
-		NEG, MOD,
-		INC, DEC,
-		INCCOUNTER, DECCOUNTER,
-		LSHFT, RSHFT,
-		VLSHFT, VRSHFT,
-		COMP, COMPC0,
-
-		LOADA, STOREA,
-		LOADB, STOREB,
-		LOADC, STOREC,
-		PUSHA, POPA,
-		PUSHB, POPB,
-		PUSHC, POPC,
-		JMPEQ, JMPNE, JMPL, JMPG, JMPGE, JMPLE, JMP, JMPC0,
-		OUTA,
-		OUTB,
-		OUTC,
-	};
+	CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* reg_mem, MemoryControlFlow* reg_flag, 
+	   Bus* bus_flag, MemoryControlFlow* reg_instr, Bus* bus_instr, MemoryControlFlow* reg_instr_addr, Bus* bus_alu, MemoryControlFlow* reg_alu_res,
+	   MemoryControlFlow* reg_alu_tmp, MemoryControlFlow* reg_a, MemoryControlFlow* reg_b, MemoryControlFlow* reg_c,
+	   MemoryControlFlow* reg_seg_instr, MemoryControlFlow* reg_seg_stack, MemoryControlFlow* reg_stack_ptr);
 
 	void process() override;
 
 private:
 
-	void prepareALU_regab(ALU::CU_CODE code, bool res_to_a = true);
-	void prepareALU_rega(ALU::CU_CODE code, bool res_to_a = true);
-	void prepareALU_regc(ALU::CU_CODE code, bool res_to_c = true);
+	void prepareALU(MemoryControlFlow* a, MemoryControlFlow* b);
+	void prepareALU(MemoryControlFlow* a);
+	void callALU(ALUInstrSet instr);
+	void ALURes_to(MemoryControlFlow* a);
 
-	void advanceInstrAddr();
-	void loadInstr();
-	void fetchFromRam();
+	inline void processALU(MemoryControlFlow* a, MemoryControlFlow* b, ALUInstrSet instr, MemoryControlFlow* res) {
+		prepareALU(a, b);
+		callALU(instr);
+		ALURes_to(a);
+	}
+
+	inline void processALU(MemoryControlFlow* a, ALUInstrSet instr, MemoryControlFlow* res) {
+		prepareALU(a);
+		callALU(instr);
+		ALURes_to(a);
+	}
+
+	inline void processALU(MemoryControlFlow* a, MemoryControlFlow* b, ALUInstrSet instr) { 
+		prepareALU(a, b);
+		callALU(instr);
+	}
+
+	inline void processALU(MemoryControlFlow* a, ALUInstrSet instr) { 
+		prepareALU(a);
+		callALU(instr);
+	}
+
+	void instrAddrForward();
+	void fetch();
 	void jmp_if(bool value);
-	bool is_flag(ALU::FLAG_BIT f);
-	bool is_not_flag(ALU::FLAG_BIT f);
+	bool is_flag(ALUFlag f);
+	bool is_not_flag(ALUFlag f);
 
 	void push(MemoryControlFlow* reg);
 	void pop(MemoryControlFlow* reg);
@@ -61,26 +61,26 @@ private:
 	Processable* out;
 
 	MemoryControlFlow* ram;
-	MemoryControlFlow* mem_reg;
+	MemoryControlFlow* reg_mem;
 
-	MemoryControlFlow* flag_reg;
-	Bus* flag_bus;
+	MemoryControlFlow* reg_flag;
+	Bus* bus_flag;
 	
-	MemoryControlFlow* instr_reg;
-	Bus* instr_bus;
-	MemoryControlFlow* instrAddr_reg;
+	MemoryControlFlow* reg_instr;
+	Bus* bus_instr;
+	MemoryControlFlow* reg_instr_addr;
 
-	Bus* ALU_bus;
-	MemoryControlFlow* ALUres_reg;
-	MemoryControlFlow* ALUtmp_reg;
+	Bus* bus_alu;
+	MemoryControlFlow* reg_alu_res;
+	MemoryControlFlow* reg_alu_tmp;
 
-	MemoryControlFlow* a_reg;
-	MemoryControlFlow* b_reg;
-	MemoryControlFlow* c_reg;
+	MemoryControlFlow* reg_a;
+	MemoryControlFlow* reg_b;
+	MemoryControlFlow* reg_c;
 
-	MemoryControlFlow* seg_instr_reg;
-	MemoryControlFlow* seg_stack_reg;
-	MemoryControlFlow* stack_ptr_reg;
+	MemoryControlFlow* reg_seg_instr;
+	MemoryControlFlow* reg_seg_stack;
+	MemoryControlFlow* reg_stack_ptr;
 };
 
 END_NS

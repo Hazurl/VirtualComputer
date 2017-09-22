@@ -4,32 +4,88 @@
 BEGIN_NS
 
 MachineCode MachineCodeHelper::generate_fibonacci() {
-	MachineCode fibonacci;
-	fibonacci.command(CU::OP::LOADA);
-	fibonacci.command(1);
-	fibonacci.command(CU::OP::LOADB);
-	fibonacci.command(1);
-	fibonacci.command(CU::OP::LOADC);
-	fibonacci.link(0);
+	MachineCode m;
+	m.command(InstrSet::Load_a);
+	m.command(1);
+	m.command(InstrSet::Load_b);
+	m.command(1);
+	m.command(InstrSet::Load_c);
+	m.link(0);
 
-	fibonacci.label(0);
-	fibonacci.command(CU::OP::COMPC0);
-	fibonacci.command(CU::OP::JMPLE);
-	fibonacci.go_to(1);
+	m.label(0);
+	m.command(InstrSet::Comp0_c);
+	m.command(InstrSet::Jmplz);
+	m.go_to(1);
 
-	fibonacci.command(CU::OP::OUTA);
-	fibonacci.command(CU::OP::PUSHA);
-	fibonacci.command(CU::OP::ADD);
-	fibonacci.command(CU::OP::POPB);
-	fibonacci.command(CU::OP::DECCOUNTER);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Push_a);
+	m.command(InstrSet::Add_ab);
+	m.command(InstrSet::Pop_b);
+	m.command(InstrSet::Dec_c);
 
-	fibonacci.command(CU::OP::JMP);
-	fibonacci.go_to(0);
+	m.command(InstrSet::Jmp);
+	m.go_to(0);
 
-	fibonacci.label(1);
-	fibonacci.command(CU::OP::OUTA);
-	fibonacci.command(CU::OP::END);
-	return fibonacci;
+	m.label(1);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Halt);
+	return m;
+}
+
+MachineCode MachineCodeHelper::generate_counter() {
+	MachineCode m;
+
+	m.command(InstrSet::Load_a);
+	m.link(0);
+	m.label(0);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Dec_a);
+	m.command(InstrSet::Comp0_a);
+	m.command(InstrSet::Jmpnz);
+	m.go_to(0);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Halt);
+
+	return m;
+}
+
+MachineCode MachineCodeHelper::generate_simple_counter() {
+	MachineCode m;
+
+	m.command(InstrSet::Load_a);
+	m.link(0);
+	m.label(0);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Dec_a);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Dec_a);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Dec_a);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Dec_a);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Halt);
+
+	return m;
+}
+
+MachineCode MachineCodeHelper::generate_for_in_range() {
+	MachineCode m;
+
+	m.command(InstrSet::Load_a);
+	m.link(0);
+	m.command(InstrSet::Load_b);
+	m.link(1);
+	m.label(0);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Inc_a);
+	m.command(InstrSet::Comp_ab);
+	m.command(InstrSet::Jmpl);
+	m.go_to(0);
+	m.command(InstrSet::Out_a);
+	m.command(InstrSet::Halt);
+
+	return m;
 }
 
 END_NS
