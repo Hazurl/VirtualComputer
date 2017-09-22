@@ -144,7 +144,7 @@
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CU.h" />
     <ClInclude Include="MachineCode.h" />
-    <ClInclude Include="MachineCodeExample.h" />
+    <ClInclude Include="MachineCodeHelper.h" />
     <ClInclude Include="MemoryControlFlow.h" />
     <ClInclude Include="OutConsole.h" />
     <ClInclude Include="Processable.h" />
@@ -161,6 +161,7 @@
     <ClCompile Include="MachineCode.cpp" />
     <ClCompile Include="OutConsole.cpp" />
     <ClCompile Include="Register.cpp" />
+    <ClCompile Include="MachineCodeHelper.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

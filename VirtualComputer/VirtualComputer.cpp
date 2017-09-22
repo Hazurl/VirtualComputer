@@ -10,7 +10,7 @@
 #include "Ram.h"
 #include "OutConsole.h"
 #include "MachineCode.h"
-#include "MachineCodeExample.h"
+#include "MachineCodeHelper.h"
 
 #include <iostream>
 #include <vector>
@@ -24,12 +24,12 @@ int main() {
 	OutConsole out(&bus_data);
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 
-	MachineCode code = generate_fibonacci();
+	MachineCode code = MachineCodeHelper::generate_fibonacci();
 	ubyte seg_instr, seg_stack;
 	byte linker[1] = { 9 };
 
 	ram.clean();
-	load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+	MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
 
 	cpu.define_program(seg_instr, seg_stack);
 	cpu.start_program();
