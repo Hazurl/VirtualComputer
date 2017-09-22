@@ -21,7 +21,7 @@ int main() {
 	Bus bus_data;
 	Bus bus_addr;
 	Ram<> ram(&bus_data, &bus_addr);
-	OutConsoleBinary out(&bus_data);
+	OutConsole<OutConsoleMode::Int, OutConsoleBetween::Space> out(&bus_data);
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 
 	MachineCode code = MachineCodeHelper::generate_fibonacci();

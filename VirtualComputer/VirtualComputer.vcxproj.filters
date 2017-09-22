@@ -13,6 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\MachineCode">
+      <UniqueIdentifier>{61821516-95bf-418a-a93b-66ca867224b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\Hardware">
+      <UniqueIdentifier>{712ae3fe-76d1-4d09-9439-6711e1b7c588}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\Hardware\CPU">
+      <UniqueIdentifier>{5729e8f9-64fc-4924-bb42-fd36f79bef1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\Hardware\IO">
+      <UniqueIdentifier>{386b01bc-34b5-41ee-9a40-27ea26c52993}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers d%27en-tête\Hardware\Memory">
+      <UniqueIdentifier>{e6ba6903-3193-4b5a-9ee6-7e7a02200581}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\MachineCode">
+      <UniqueIdentifier>{c118923e-16a8-45fb-b8c7-ca73a2ed7bcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\Hardware">
+      <UniqueIdentifier>{8c38d4ea-134c-4743-8f33-4c3ced3ddb65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\Hardware\CPU">
+      <UniqueIdentifier>{07fb245e-00cd-42fa-b0c1-fc9281512e51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Fichiers sources\Hardware\Memory">
+      <UniqueIdentifier>{3dada565-54b9-4e85-a458-317f0ce11381}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -24,41 +51,44 @@
     <ClInclude Include="targetver.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="MachineCode.h">
+      <Filter>Fichiers d%27en-tête\MachineCode</Filter>
+    </ClInclude>
+    <ClInclude Include="MachineCodeHelper.h">
+      <Filter>Fichiers d%27en-tête\MachineCode</Filter>
+    </ClInclude>
+    <ClInclude Include="Bus.h">
+      <Filter>Fichiers d%27en-tête\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Processable.h">
+      <Filter>Fichiers d%27en-tête\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="Register.h">
+      <Filter>Fichiers d%27en-tête\Hardware</Filter>
+    </ClInclude>
+    <ClInclude Include="ALU.h">
+      <Filter>Fichiers d%27en-tête\Hardware\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="CPU.h">
+      <Filter>Fichiers d%27en-tête\Hardware\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="CU.h">
+      <Filter>Fichiers d%27en-tête\Hardware\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="OutConsole.h">
+      <Filter>Fichiers d%27en-tête\Hardware\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Ram.h">
+      <Filter>Fichiers d%27en-tête\Hardware\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryControlFlow.h">
+      <Filter>Fichiers d%27en-tête\Hardware\Memory</Filter>
+    </ClInclude>
     <ClInclude Include="config.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="Bus.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="Register.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="ALU.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CU.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="CPU.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="Processable.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="MemoryControlFlow.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="Ram.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="OutConsole.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="MachineCode.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="MachineCodeHelper.h">
-      <Filter>Fichiers d%27en-tête</Filter>
+    <ClInclude Include="InstrSet.h">
+      <Filter>Fichiers d%27en-tête\Hardware\CPU</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -68,26 +98,26 @@
     <ClCompile Include="VirtualComputer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="Bus.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Register.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="ALU.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CU.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
-    <ClCompile Include="CPU.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="MachineCode.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources\MachineCode</Filter>
     </ClCompile>
     <ClCompile Include="MachineCodeHelper.cpp">
-      <Filter>Fichiers sources</Filter>
+      <Filter>Fichiers sources\MachineCode</Filter>
+    </ClCompile>
+    <ClCompile Include="ALU.cpp">
+      <Filter>Fichiers sources\Hardware\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Bus.cpp">
+      <Filter>Fichiers sources\Hardware</Filter>
+    </ClCompile>
+    <ClCompile Include="CPU.cpp">
+      <Filter>Fichiers sources\Hardware\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="CU.cpp">
+      <Filter>Fichiers sources\Hardware\CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="Register.cpp">
+      <Filter>Fichiers sources\Hardware</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

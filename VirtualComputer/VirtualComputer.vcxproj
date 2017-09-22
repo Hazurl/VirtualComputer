@@ -143,6 +143,7 @@
     <ClInclude Include="config.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CU.h" />
+    <ClInclude Include="InstrSet.h" />
     <ClInclude Include="MachineCode.h" />
     <ClInclude Include="MachineCodeHelper.h" />
     <ClInclude Include="MemoryControlFlow.h" />
