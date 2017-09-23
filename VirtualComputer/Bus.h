@@ -73,9 +73,9 @@ public:
 	byte extract_hl() const;
 	byte extract_lh() const;
 	byte extract_ll() const;
-	byte extract_h() const;
-	byte extract_l() const;
-	byte extract() const;
+	word extract_h() const;
+	word extract_l() const;
+	dword extract() const;
 
 	Bus8::bit_t bit(ubyte p);
 

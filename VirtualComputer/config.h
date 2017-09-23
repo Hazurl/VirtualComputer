@@ -21,8 +21,8 @@ constexpr ubyte ubyte_max = std::numeric_limits<uint8_t>::max();
 using word = int16_t;
 using uword = uint16_t;
 
-constexpr word dword_min = std::numeric_limits<int16_t>::min();
-constexpr word dword_max = std::numeric_limits<int16_t>::max();
+constexpr word word_min = std::numeric_limits<int16_t>::min();
+constexpr word word_max = std::numeric_limits<int16_t>::max();
 
 constexpr uword uword_min = std::numeric_limits<uint16_t>::min();
 constexpr uword uword_max = std::numeric_limits<uint16_t>::max();
@@ -35,5 +35,14 @@ constexpr dword dword_max = std::numeric_limits<int32_t>::max();
 
 constexpr udword udword_min = std::numeric_limits<uint32_t>::min();
 constexpr udword udword_max = std::numeric_limits<uint32_t>::max();
+
+using xdword = int64_t;
+using uxdword = uint64_t;
+
+constexpr xdword xdword_min = std::numeric_limits<int64_t>::min();
+constexpr xdword xdword_max = std::numeric_limits<int64_t>::max();
+
+constexpr uxdword uxdword_min = std::numeric_limits<uint64_t>::min();
+constexpr uxdword uxdword_max = std::numeric_limits<uint64_t>::max();
 
 END_NS

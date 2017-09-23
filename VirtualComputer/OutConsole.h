@@ -22,13 +22,13 @@ template<OutConsoleMode mode, OutConsoleBetween between>
 class OutConsole : public Processable {
 public:
 
-	OutConsole(Bus16* bus_data) : bus_data(bus_data) {}
+	OutConsole(Bus32* bus_data) : bus_data(bus_data) {}
 
 	void OutConsole::process() {
-		byte data = bus_data->extract();
+		dword data = bus_data->extract();
 		switch(mode) {
 		case vphaz::OutConsoleMode::Binary:
-			for(byte i = 7; i >= 0; --i)
+			for(byte i = 31; i >= 0; --i)
 				std::cout << ((data & (1 << i)) != 0);
 			break;
 		case vphaz::OutConsoleMode::Int:
@@ -53,7 +53,7 @@ public:
 
 private:
 
-	Bus16* bus_data;
+	Bus32* bus_data;
 };
 
 using OutConsoleChar = OutConsole<OutConsoleMode::Char, OutConsoleBetween::Nothing>;

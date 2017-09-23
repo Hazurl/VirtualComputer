@@ -5,7 +5,7 @@
 
 BEGIN_NS
 
-ALU::ALU(const Bus16* CU, Bus16* flag, Bus16* output, const Bus16* inputA, const Bus16* inputB) 
+ALU::ALU(const Bus8* CU, Bus8* flag, Bus32* output, const Bus32* inputA, const Bus32* inputB) 
 	: CU(CU), flag(flag), output(output), inputA(inputA), inputB(inputB) 
 {
 
@@ -13,133 +13,134 @@ ALU::ALU(const Bus16* CU, Bus16* flag, Bus16* output, const Bus16* inputA, const
 
 void ALU::process() {
 	switch(static_cast<ALUInstrSet>(CU->extract())) {
-	case ALUInstrSet::Add:
+	case ALUInstrSet::Add32:
 	{
-		short a = static_cast<short>(inputA->extract());
-		short b = static_cast<short>(inputB->extract());
-		short res = a + b;
-		setflags(!res, res > 0, res > byte_max, res > byte_max);
-		output->bind(static_cast<byte>(res));
+		xdword a = static_cast<xdword>(inputA->extract());
+		xdword b = static_cast<xdword>(inputB->extract());
+		xdword res = a + b;
+		setflags(!res, res > 0, res > dword_max, res > dword_max);
+		output->bind(static_cast<dword>(res));
 		break;
 	}
-	case ALUInstrSet::Sub:
+	case ALUInstrSet::Sub32:
 	{
-		short a = static_cast<short>(inputA->extract());
-		short b = static_cast<short>(inputB->extract());
-		short res = a - b;
-		setflags(!res, res > 0, res < byte_min, res >= byte_min);
-		output->bind(static_cast<byte>(res));
+		xdword a = static_cast<xdword>(inputA->extract());
+		xdword b = static_cast<xdword>(inputB->extract());
+		xdword res = a - b;
+		setflags(!res, res > 0, res < dword_min, res >= dword_min);
+		output->bind(static_cast<dword>(res));
 		break;
 	}
-	case ALUInstrSet::Neg:
+	case ALUInstrSet::Neg32:
 	{
-		byte a = inputA->extract();
-		byte res = -a;
-		setflags(!res, res > 0, a == byte_min, a == byte_min);
+		dword a = inputA->extract();
+		dword res = -a;
+		setflags(!res, res > 0, a == dword_min, a == dword_min);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::Mul:
+	case ALUInstrSet::Mul32:
 	{
-		int a = static_cast<int>(inputA->extract());
-		int b = static_cast<int>(inputB->extract());
-		int res = a * b;
+		xdword a = static_cast<int>(inputA->extract());
+		xdword b = static_cast<int>(inputB->extract());
+		xdword res = a * b;
 
-		setflags(!res, res > 0, res > byte_max || res < byte_min, res > byte_max);
+		setflags(!res, res > 0, res > dword_max || res < dword_min, res > dword_max);
 
-		output->bind(static_cast<byte>(res));
+		output->bind(static_cast<dword>(res));
 		break;
 	}
-	case ALUInstrSet::Div:
+	case ALUInstrSet::Div32:
 	{
-		byte a = inputA->extract();
-		byte b = inputB->extract();
+		dword a = inputA->extract();
+		dword b = inputB->extract();
 		if(b == 0) {
 			setflags(0, (a > 0) ^ (b > 0), 1, 1);
 			break;
 		}
-		byte res = a / b;
+		dword res = a / b;
 		setflags(!res, res > 0, 0, 0);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::Mod:
+	case ALUInstrSet::Mod32:
 	{
-		byte a = inputA->extract();
-		byte b = inputB->extract();
+		dword a = inputA->extract();
+		dword b = inputB->extract();
 		if(b == 0) {
 			setflags(0, (a > 0) ^ (b > 0), 1, 1);
 			break;
 		}
-		byte res = a % b;
+		dword res = a % b;
 		setflags(!res, res > 0, 0, 0);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::Inc:
+	case ALUInstrSet::Inc32:
 	{
-		byte a = inputA->extract();
-		byte res = a + 1;
-		setflags(!res, res > 0, a == byte_max, a == byte_max);
+		dword a = inputA->extract();
+		dword res = a + 1;
+		setflags(!res, res > 0, a == dword_max, a == dword_max);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::Dec:
+	case ALUInstrSet::Dec32:
 	{
-		byte a = inputA->extract();
-		byte res = a - 1;
-		setflags(!res, res > 0, a == byte_min, a != byte_min);
+		dword a = inputA->extract();
+		dword res = a - 1;
+		setflags(!res, res > 0, a == dword_min, a != dword_min);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::LShift:
+	case ALUInstrSet::LShift32:
 	{
-		byte a = inputA->extract();
-		bool ovf = a & (1 << 8);
-		byte res = a << 1;
+		dword a = inputA->extract();
+		bool ovf = a & (1 << 1);
+		dword res = a << 1;
 		setflags(!res, res > 0, ovf, ovf);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::RShift:
+	case ALUInstrSet::RShift32:
 	{
-		byte a = inputA->extract();
-		byte res = a >> 1;
+		dword a = inputA->extract();
+		dword res = a >> 1;
 		bool ovf = a & 1;
 		setflags(!res, res > 0, ovf, !ovf);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::VLShift:
+	case ALUInstrSet::VLShift32:
 	{
-		byte a = inputA->extract();
-		byte b = inputB->extract();
-		byte res = a << b;
-		bool ovf = b > 8 || (a & ((~0) << b));
+		dword a = inputA->extract();
+		dword b = inputB->extract();
+		dword res = a << b;
+		bool ovf = b > 31 || (a & ((~0) << b));
 		setflags(!res, res > 0, ovf, ovf);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::VRShift:
+	case ALUInstrSet::VRShift32:
 	{
-		byte a = inputA->extract();
-		byte b = inputB->extract();
-		byte res = a >> b;
-		bool ovf = b > 8 || (a & ~((~0) << b));
+		dword a = inputA->extract();
+		dword b = inputB->extract();
+		dword res = a >> b;
+		bool ovf = b > 31 || (a & ~((~0) << b));
 		setflags(!res, res > 0, ovf, !ovf);
 		output->bind(res);
 		break;
 	}
-	case ALUInstrSet::Comp:
+	case ALUInstrSet::Comp32:
 	{
-		byte res = inputA->extract() - inputB->extract();
-		setflags(!res, res > 0, 0, 0);
+		dword a = inputA->extract();
+		dword b = inputB->extract();
+		setflags(a == b, a > b, 0, 0);
 		break;
 	}
-	case ALUInstrSet::Comp0:
+	case ALUInstrSet::Comp032:
 	{
-		byte res = inputA->extract();
-		setflags(!res, res > 0, 0, 0);
+		dword a = inputA->extract();
+		setflags(a == 0, a > 0, 0, 0);
 		break;
 	}
 	default:

@@ -51,7 +51,7 @@ byte Bus16::extract_l() const {
 }
 
 word Bus16::extract() const {
-	return (h.extract() << 8) | l.extract();
+	return (static_cast<ubyte>(h.extract()) << 8) | static_cast<ubyte>(l.extract());
 }
 
 Bus8::bit_t Bus16::bit(ubyte p) {
@@ -113,31 +113,31 @@ void Bus32::bind(dword b) {
 }
 
 byte Bus32::extract_hh() const {
-	h.extract_h();
+	return h.extract_h();
 }
 
 byte Bus32::extract_hl() const {
-	h.extract_l();
+	return h.extract_l();
 }
 
 byte Bus32::extract_lh() const {
-	l.extract_h();
+	return l.extract_h();
 }
 
 byte Bus32::extract_ll() const {
-	l.extract_l();
+	return l.extract_l();
 }
 
-byte Bus32::extract_h() const {
-	h.extract();
+word Bus32::extract_h() const {
+	return h.extract();
 }
 
-byte Bus32::extract_l() const {
-	l.extract();
+word Bus32::extract_l() const {
+	return l.extract();
 }
 
-byte Bus32::extract() const {
-	return (static_cast<dword>(h.extract()) << 16) | l.extract();
+dword Bus32::extract() const {
+	return (static_cast<uword>(h.extract()) << 16) | static_cast<uword>(l.extract());
 }
 
 Bus8::bit_t Bus32::bit(ubyte p) {

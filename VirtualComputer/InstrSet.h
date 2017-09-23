@@ -12,20 +12,50 @@ enum class ALUFlag : byte {
 };
 
 enum class ALUInstrSet : ubyte {
-	Add,		// 2 arg : a + b
-	Sub,		// 2 arg : a - b
-	Mul,		// 2 arg : a * b
-	Div,		// 2 arg : a / b
-	Mod,		// 2 arg : a % b
-	Neg,		// 1 arg : -a
-	Inc,		// 1 arg : a + 1 
-	Dec,		// 1 arg : a - 1
-	LShift,		// 1 arg : a << 1
-	RShift,		// 1 arg : a >> 1
-	VLShift,	// 2 arg : a << b
-	VRShift,	// 2 arg : a >> b
-	Comp,		// 2 arg : a ? b
-	Comp0,		// 1 arg : a ? 0
+	Add8,		// 2 arg : a + b
+	Sub8,		// 2 arg : a - b
+	Mul8,		// 2 arg : a * b
+	Div8,		// 2 arg : a / b
+	Mod8,		// 2 arg : a % b
+	Neg8,		// 1 arg : -a
+	Inc8,		// 1 arg : a + 1 
+	Dec8,		// 1 arg : a - 1
+	LShift8,	// 1 arg : a << 1
+	RShift8,	// 1 arg : a >> 1
+	VLShift8,	// 2 arg : a << b
+	VRShift8,	// 2 arg : a >> b
+	Comp8,		// 2 arg : a ? b
+	Comp08,		// 1 arg : a ? 0
+
+	Add16,		// 2 arg : a + b
+	Sub16,		// 2 arg : a - b
+	Mul16,		// 2 arg : a * b
+	Div16,		// 2 arg : a / b
+	Mod16,		// 2 arg : a % b
+	Neg16,		// 1 arg : -a
+	Inc16,		// 1 arg : a + 1 
+	Dec16,		// 1 arg : a - 1
+	LShift16,	// 1 arg : a << 1
+	RShift16,	// 1 arg : a >> 1
+	VLShift16,	// 2 arg : a << b
+	VRShift16,	// 2 arg : a >> b
+	Comp16,		// 2 arg : a ? b
+	Comp016,	// 1 arg : a ? 0
+
+	Add32,		// 2 arg : a + b
+	Sub32,		// 2 arg : a - b
+	Mul32,		// 2 arg : a * b
+	Div32,		// 2 arg : a / b
+	Mod32,		// 2 arg : a % b
+	Neg32,		// 1 arg : -a
+	Inc32,		// 1 arg : a + 1 
+	Dec32,		// 1 arg : a - 1
+	LShift32,	// 1 arg : a << 1
+	RShift32,	// 1 arg : a >> 1
+	VLShift32,	// 2 arg : a << b
+	VRShift32,	// 2 arg : a >> b
+	Comp32,		// 2 arg : a ? b
+	Comp032,	// 1 arg : a ? 0
 };
 
 enum class InstrSet : ubyte {
@@ -94,6 +124,30 @@ enum class InstrSet : ubyte {
 	Store_c,	// args: addr
 	Out_c,
 };
+
+inline dword dwordv(InstrSet s) {
+	return static_cast<dword>(s);
+}
+
+inline dword dwordv(ALUInstrSet s) {
+	return static_cast<dword>(s);
+}
+
+inline dword dwordv(ALUFlag s) {
+	return static_cast<dword>(s);
+}
+
+inline word wordv(InstrSet s) {
+	return static_cast<word>(s);
+}
+
+inline word wordv(ALUInstrSet s) {
+	return static_cast<word>(s);
+}
+
+inline word wordv(ALUFlag s) {
+	return static_cast<word>(s);
+}
 
 inline byte bytev(InstrSet s) {
 	return static_cast<byte>(s);

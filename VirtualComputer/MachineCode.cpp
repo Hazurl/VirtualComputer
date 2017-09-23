@@ -3,12 +3,12 @@
 
 BEGIN_NS
 
-MachineCode::Instr::Instr(Instr:: State s, byte b) : state(s), cmd(b) {
+MachineCode::Instr::Instr(Instr:: State s, dword b) : state(s), cmd(b) {
 
 }
 
-std::vector<byte> MachineCode::generate(byte* linker) {
-	std::vector<byte> gen;
+std::vector<dword> MachineCode::generate(dword* linker) {
+	std::vector<dword> gen;
 	std::unordered_map<byte, byte> labels; // id -> mem
 	std::unordered_map<byte, byte> go_tos; // id -> mem
 	for(auto& i : code) {
@@ -20,12 +20,12 @@ std::vector<byte> MachineCode::generate(byte* linker) {
 			gen.emplace_back(linker[i.cmd]);
 			break;
 		case Instr::State::label:
-			labels.emplace(i.cmd, gen.size() - 1);
+			labels.emplace(i.cmd, (gen.size() - 1) * sizeof(dword));
 			break;
 		case Instr::State::label_addr:
 			auto it = labels.find(i.cmd);
 			if(it != labels.end())
-				gen.emplace_back(it->second + 1);
+				gen.emplace_back(it->second + sizeof(dword));
 			else {
 				go_tos.emplace(i.cmd, gen.size());
 				gen.emplace_back(0);
@@ -38,17 +38,17 @@ std::vector<byte> MachineCode::generate(byte* linker) {
 		auto it = labels.find(p.first);
 		if(it == labels.end())
 			return {};
-		gen[p.second] = it->second + 1;
+		gen[p.second] = it->second;
 	}
 
 	return gen;
 }
 
 void MachineCode::command(InstrSet cmd) {
-	command(static_cast<byte>(cmd));
+	command(static_cast<dword>(cmd));
 }
 
-void MachineCode::command(byte cmd) {
+void MachineCode::command(dword cmd) {
 	code.emplace_back(Instr::State::cmd, cmd);
 }
 

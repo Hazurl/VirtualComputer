@@ -12,9 +12,9 @@ BEGIN_NS
 class MachineCode {
 public:
 
-	std::vector<byte> generate(byte* linker);
+	std::vector<dword> generate(dword* linker);
 
-	void command(byte cmd);
+	void command(dword cmd);
 	void command(InstrSet cmd);
 	void link(byte id);
 	void label(byte id);
@@ -29,9 +29,9 @@ private:
 			label_addr
 		};
 		State state;
-		byte cmd;
+		dword cmd;
 
-		Instr(State s, byte b);		
+		Instr(State s, dword b);
 	};
 
 	std::vector<Instr> code;

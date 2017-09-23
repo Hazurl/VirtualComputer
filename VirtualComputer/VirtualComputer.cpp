@@ -18,16 +18,17 @@
 int main() {
 	using namespace NAMESPACE;
 
-	Bus16 bus_data;
-	Bus16 bus_addr;
-	Ram<> ram(&bus_data, &bus_addr);
+	Bus32 bus_data;
+	Bus32 bus_addr;
+	Ram<1 << 16> ram(&bus_data, &bus_addr);
 	OutConsole<OutConsoleMode::Int, OutConsoleBetween::Space> out(&bus_data);
+	//OutConsole<OutConsoleMode::Binary, OutConsoleBetween::Space> out(&bus_data);
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 
-	{
+	if (true) {
 		MachineCode code = MachineCodeHelper::generate_counter();
-		ubyte seg_instr, seg_stack;
-		byte linker[] = { 10 };
+		udword seg_instr, seg_stack;
+		dword linker[] = { 10 };
 
 		ram.clean();
 		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
@@ -35,11 +36,11 @@ int main() {
 		cpu.define_program(seg_instr, seg_stack);
 		cpu.start_program();
 	}
-	std::cout << std::endl;
-	{
+	std::cout << std::endl << std::endl;
+	if(true){
 		MachineCode code = MachineCodeHelper::generate_for_in_range();
-		ubyte seg_instr, seg_stack;
-		byte linker[] = { 10, 20 };
+		udword seg_instr, seg_stack;
+		dword linker[] = { 120, 130 };
 
 		ram.clean();
 		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
@@ -47,11 +48,11 @@ int main() {
 		cpu.define_program(seg_instr, seg_stack);
 		cpu.start_program();
 	}
-	std::cout << std::endl;
-	{
+	std::cout << std::endl << std::endl;
+	if(true){
 		MachineCode code = MachineCodeHelper::generate_fibonacci();
-		ubyte seg_instr, seg_stack;
-		byte linker[] = { 10 };
+		udword seg_instr, seg_stack;
+		dword linker[] = { 44 };
 
 		ram.clean();
 		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
