@@ -9,36 +9,36 @@ BEGIN_NS
 
 class CPU {
 public:
-	CPU(Bus* bus_data, Bus* bus_addr, MemoryControlFlow* ram, Processable* out);
+	CPU(Bus16* bus_data, Bus16* bus_addr, MemoryControlFlow* ram, Processable* out);
 
 	void define_program(ubyte entry_point, ubyte segment_stack);
 	void start_program();
 
 private:
 
-	Bus* bus_data;
-	Bus* bus_addr;
+	Bus16* bus_data;
+	Bus16* bus_addr;
 
-	Bus bus_instr;
-	Bus bus_ALURes;
-	Bus bus_ALUTmp;
-	Bus bus_ALUCode;
-	Bus bus_ALUFlag;
-	Bus bus_CUFlag;
+	Bus16 bus_instr;
+	Bus16 bus_ALURes;
+	Bus16 bus_ALUTmp;
+	Bus16 bus_ALUCode;
+	Bus16 bus_ALUFlag;
+	Bus16 bus_CUFlag;
 
-	Register reg_memory;
-	Register reg_a;
-	Register reg_b;
-	Register reg_c;
-	Register reg_instr;
-	Register reg_instrAddr;
-	Register reg_ALUTmp;
-	Register reg_ALURes;
-	Register reg_flag;
-	Register reg_stack_ptr;
+	Register8 reg_memory;
+	Register8 reg_a;
+	Register8 reg_b;
+	Register8 reg_c;
+	Register8 reg_instr;
+	Register8 reg_instrAddr;
+	Register8 reg_ALUTmp;
+	Register8 reg_ALURes;
+	Register8 reg_flag;
+	Register8 reg_stack_ptr;
 
-	Register reg_seg_instr;
-	Register reg_seg_stack;
+	Register8 reg_seg_instr;
+	Register8 reg_seg_stack;
 
 	ALU alu;
 	CU cu;

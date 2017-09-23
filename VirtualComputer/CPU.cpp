@@ -3,7 +3,7 @@
 #include <iostream>
 BEGIN_NS
 
-CPU::CPU(Bus* bus_data, Bus* bus_addr, MemoryControlFlow* ram, Processable* out) :
+CPU::CPU(Bus16* bus_data, Bus16* bus_addr, MemoryControlFlow* ram, Processable* out) :
 	bus_data(bus_data),
 	reg_memory(bus_data, bus_addr),
 	reg_a(bus_data, bus_data),

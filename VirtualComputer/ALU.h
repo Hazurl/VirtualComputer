@@ -9,7 +9,7 @@ BEGIN_NS
 
 class ALU : public Processable {
 public:
-	ALU(const Bus* CU, Bus* flag, Bus* output, const Bus* inputA, const Bus* inputB);
+	ALU(const Bus16* CU, Bus16* flag, Bus16* output, const Bus16* inputA, const Bus16* inputB);
 
 	void process() override;
 
@@ -17,11 +17,11 @@ private:
 
 	void setflags(bool zero, bool comp, bool overflow, bool carry);
 
-	const Bus* CU;
-	Bus* flag;
-	Bus* output;
-	const Bus* inputA;
-	const Bus* inputB;
+	const Bus16* CU;
+	Bus16* flag;
+	Bus16* output;
+	const Bus16* inputA;
+	const Bus16* inputB;
 
 };
 

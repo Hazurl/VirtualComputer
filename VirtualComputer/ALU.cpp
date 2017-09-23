@@ -5,7 +5,7 @@
 
 BEGIN_NS
 
-ALU::ALU(const Bus* CU, Bus* flag, Bus* output, const Bus* inputA, const Bus* inputB) 
+ALU::ALU(const Bus16* CU, Bus16* flag, Bus16* output, const Bus16* inputA, const Bus16* inputB) 
 	: CU(CU), flag(flag), output(output), inputA(inputA), inputB(inputB) 
 {
 

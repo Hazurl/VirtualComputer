@@ -10,7 +10,7 @@ BEGIN_NS
 template<unsigned int size = ubyte_max + 1>
 class Ram : public MemoryControlFlow {
 public:
-	Ram(Bus* bus_data, Bus* bus_addr)
+	Ram(Bus16* bus_data, Bus16* bus_addr)
 		: bus_data(bus_data), bus_addr(bus_addr) {
 
 	}
@@ -47,8 +47,8 @@ public:
 
 private:
 
-	Bus* bus_data;
-	Bus* bus_addr;
+	Bus16* bus_data;
+	Bus16* bus_addr;
 
 	byte memory[size];
 

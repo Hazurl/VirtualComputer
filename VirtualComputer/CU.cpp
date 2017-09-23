@@ -5,7 +5,7 @@
 BEGIN_NS
 
 CU::CU(MemoryControlFlow* ram, Processable* alu, Processable* out, MemoryControlFlow* reg_mem, MemoryControlFlow * reg_flag,
-	   Bus * bus_flag, MemoryControlFlow * reg_instr, Bus * bus_instr, MemoryControlFlow * reg_instr_addr, Bus * bus_alu, MemoryControlFlow * reg_alu_res,
+	   Bus16 * bus_flag, MemoryControlFlow * reg_instr, Bus16 * bus_instr, MemoryControlFlow * reg_instr_addr, Bus16 * bus_alu, MemoryControlFlow * reg_alu_res,
 	   MemoryControlFlow * reg_alu_tmp, MemoryControlFlow * reg_a, MemoryControlFlow * reg_b, MemoryControlFlow * reg_c,
 	   MemoryControlFlow* reg_seg_instr, MemoryControlFlow* reg_seg_stack, MemoryControlFlow* reg_stack_ptr)
   : alu(alu),

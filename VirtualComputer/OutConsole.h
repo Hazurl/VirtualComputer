@@ -22,7 +22,7 @@ template<OutConsoleMode mode, OutConsoleBetween between>
 class OutConsole : public Processable {
 public:
 
-	OutConsole(Bus* bus_data) : bus_data(bus_data) {}
+	OutConsole(Bus16* bus_data) : bus_data(bus_data) {}
 
 	void OutConsole::process() {
 		byte data = bus_data->extract();
@@ -53,7 +53,7 @@ public:
 
 private:
 
-	Bus* bus_data;
+	Bus16* bus_data;
 };
 
 using OutConsoleChar = OutConsole<OutConsoleMode::Char, OutConsoleBetween::Nothing>;

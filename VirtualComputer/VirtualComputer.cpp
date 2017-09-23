@@ -18,21 +18,47 @@
 int main() {
 	using namespace NAMESPACE;
 
-	Bus bus_data;
-	Bus bus_addr;
+	Bus16 bus_data;
+	Bus16 bus_addr;
 	Ram<> ram(&bus_data, &bus_addr);
 	OutConsole<OutConsoleMode::Int, OutConsoleBetween::Space> out(&bus_data);
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 
-	MachineCode code = MachineCodeHelper::generate_for_in_range();
-	ubyte seg_instr, seg_stack;
-	byte linker[] = { 10, 20 };
+	{
+		MachineCode code = MachineCodeHelper::generate_counter();
+		ubyte seg_instr, seg_stack;
+		byte linker[] = { 10 };
 
-	ram.clean();
-	MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+		ram.clean();
+		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
 
-	cpu.define_program(seg_instr, seg_stack);
-	cpu.start_program();
+		cpu.define_program(seg_instr, seg_stack);
+		cpu.start_program();
+	}
+	std::cout << std::endl;
+	{
+		MachineCode code = MachineCodeHelper::generate_for_in_range();
+		ubyte seg_instr, seg_stack;
+		byte linker[] = { 10, 20 };
+
+		ram.clean();
+		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+
+		cpu.define_program(seg_instr, seg_stack);
+		cpu.start_program();
+	}
+	std::cout << std::endl;
+	{
+		MachineCode code = MachineCodeHelper::generate_fibonacci();
+		ubyte seg_instr, seg_stack;
+		byte linker[] = { 10 };
+
+		ram.clean();
+		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+
+		cpu.define_program(seg_instr, seg_stack);
+		cpu.start_program();
+	}
 
 	std::cout << std::endl;
 	std::cin.get();

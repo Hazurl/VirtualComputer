@@ -4,7 +4,7 @@
 
 BEGIN_NS
 
-class Bus {
+class Bus8 {
 public:
 
 	void bind(byte b);
@@ -33,6 +33,63 @@ public:
 
 private:
 	byte storage = 0;
+};
+
+class Bus16 {
+public:
+	void bind(byte h, byte l);
+	void bind_h(byte b);
+	void bind_l(byte b);
+	void bind(word b);
+
+	byte extract_h() const;
+	byte extract_l() const;
+	word extract() const;
+
+	Bus8::bit_t bit(ubyte p);
+
+	Bus8& bus_h();
+	Bus8& bus_l();
+
+private:
+
+	Bus8 h;
+	Bus8 l;
+};
+
+class Bus32 {
+public:
+	void bind(byte hh, byte hl, byte lh, byte ll);
+	void bind_hh(byte hh);
+	void bind_hl(byte hl);
+	void bind_lh(byte lh);
+	void bind_ll(byte ll);
+	void bind(word h, word l);
+	void bind_h(word h);
+	void bind_l(word l);
+	void bind(dword b);
+
+	byte extract_hh() const;
+	byte extract_hl() const;
+	byte extract_lh() const;
+	byte extract_ll() const;
+	byte extract_h() const;
+	byte extract_l() const;
+	byte extract() const;
+
+	Bus8::bit_t bit(ubyte p);
+
+	Bus8& bus_hh();
+	Bus8& bus_hl();
+	Bus8& bus_lh();
+	Bus8& bus_ll();
+	Bus16& bus_h();
+	Bus16& bus_l();
+
+private:
+
+	Bus16 h;
+	Bus16 l;
 };
 
 END_NS
