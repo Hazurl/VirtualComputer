@@ -58,7 +58,7 @@ enum class ALUInstrSet : ubyte {
 	Comp032,	// 1 arg : a ? 0
 };
 
-enum class InstrSet : ubyte {
+enum class InstrSet : uword {
 	Halt = 0,
 
 	// Operation on flag
@@ -70,59 +70,37 @@ enum class InstrSet : ubyte {
 	Jmpl,		// args: addr_to_jmp
 	Jmplz,		// args: addr_to_jmp
 
-	// Operation on register A and B
-	Add_ab,
-	Sub_ab,
-	Mul_ab,
-	Div_ab,
-	Mod_ab,
-	LShift_ab,
-	RShift_ab,
-	Comp_ab,
-	Move_ab,
-	Move_ba,
+	Defer,
+	Comp, Comp0,
+	Add, Sub,
+	Mul, Div, Mod,
+	Move,
+	Inc, Dec,
+	Neg, 
+	LShift, RShift,
+	Push, Pop,
+	Load, LoadRel, Store,
+	Out
+};
 
-	// Operation on register a
-	Inc_a,
-	Dec_a,
-	Neg_a,
-	LShift_a,
-	RShift_a,
-	Comp0_a,
-	Push_a,
-	Pop_a,
-	Load_a,		// args: value
-	LoadRel_a,	// args: addr_value
-	Store_a,	// args: addr
-	Out_a,
+enum class InstrSetSecondary : ubyte {
+	Ra, Rb, Rc,
+	Rab, Rba,
+	Rac, Rca,
+	Rbc, Rcb,
+	RelAddr, Addr,
+	Value,
+};
 
-	// Operation on register b
-	Inc_b,
-	Dec_b,
-	Neg_b,
-	LShift_b,
-	RShift_b,
-	Comp0_b,
-	Push_b,
-	Pop_b,
-	Load_b,		// args: value
-	LoadRel_b,	// args: addr_value
-	Store_b,	// args: addr
-	Out_b,
+enum class InstrSetTertiary : ubyte {
+	ll, lh, hl, hh, h, l, x,
+	
+	ll_lh, ll_hl, ll_hh,
+	lh_ll, lh_hl, lh_hh,
+	hl_ll, hl_lh, hl_hh,
+	hh_ll, hh_lh, hh_hl,
 
-	// Operation on register c
-	Inc_c,
-	Dec_c,
-	Neg_c,
-	LShift_c,
-	RShift_c,
-	Comp0_c,
-	Push_c,
-	Pop_c,
-	Load_c,		// args: value
-	LoadRel_c,	// args: addr_value
-	Store_c,	// args: addr
-	Out_c,
+	l_h, h_l,
 };
 
 inline dword dwordv(InstrSet s) {
@@ -147,10 +125,6 @@ inline word wordv(ALUInstrSet s) {
 
 inline word wordv(ALUFlag s) {
 	return static_cast<word>(s);
-}
-
-inline byte bytev(InstrSet s) {
-	return static_cast<byte>(s);
 }
 
 inline byte bytev(ALUInstrSet s) {

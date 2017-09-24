@@ -32,8 +32,34 @@ CU::CU(MemoryControlFlow32* ram, Processable* alu, Processable* out, MemoryContr
 
 void CU::process() {
 	fetch();
-	
-	switch(static_cast<InstrSet>(bus_instr->extract())) {
+
+	MemoryControlFlow32* reg_0 = nullptr;
+	MemoryControlFlow32* reg_1 = nullptr;
+	bool is_value = false;
+	bool is_address = false;
+	bool is_relative = false;
+
+	switch(static_cast<InstrSetSecondary>(bus_instr->extract_lh())) {
+	case InstrSetSecondary::Ra: reg_0 = reg_a; break;
+	case InstrSetSecondary::Rb: reg_0 = reg_b; break;
+	case InstrSetSecondary::Rc: reg_0 = reg_c; break;
+	case InstrSetSecondary::Rab: reg_0 = reg_a; reg_1 = reg_b; break;
+	case InstrSetSecondary::Rba: reg_0 = reg_b; reg_1 = reg_a; break;
+	case InstrSetSecondary::Rac: reg_0 = reg_a; reg_1 = reg_c; break;
+	case InstrSetSecondary::Rca: reg_0 = reg_c; reg_1 = reg_a; break;
+	case InstrSetSecondary::Rbc: reg_0 = reg_b; reg_1 = reg_c; break;
+	case InstrSetSecondary::Rcb: reg_0 = reg_c; reg_1 = reg_b; break;
+	case InstrSetSecondary::Addr: is_address = true; break;
+	case InstrSetSecondary::RelAddr: is_address = is_relative = true; break;
+	case InstrSetSecondary::Value: is_value = true; break;
+
+	default:
+		std::cout << "Oups (unknown code: " << (int)bus_instr->extract_l() << ")" << std::endl;
+		std::cin.get();
+		exit(1);
+	}
+
+	switch(static_cast<InstrSet>(bus_instr->extract_h())) {
 	case InstrSet::Jmp:
 		instrAddrForward();
 		jmp_if(true);
@@ -63,88 +89,28 @@ void CU::process() {
 		jmp_if( is_not_flag(ALUFlag::Comp) );
 		break;
 
-	case InstrSet::Add_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::Add32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Sub_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::Sub32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Mul_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::Mul32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Div_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::Div32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Mod_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::Mod32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::LShift_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::VLShift32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::RShift_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::VRShift32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Comp_ab:
-		processALU(reg_a, reg_b, ALUInstrSet::Comp32);
-		instrAddrForward();
-		break;
-	case InstrSet::Move_ab:
+	case InstrSet::Move:
 		reg_a->write32();
 		reg_b->read32();
 		instrAddrForward();
 		break;
-	case InstrSet::Move_ba:
-		reg_b->write32();
-		reg_a->read32();
-		instrAddrForward();
-		break;
 
-	case InstrSet::Inc_a:
-		processALU(reg_a, ALUInstrSet::Inc32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Dec_a:
-		processALU(reg_a, ALUInstrSet::Dec32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Neg_a:
-		processALU(reg_a, ALUInstrSet::Neg32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::LShift_a:
-		processALU(reg_a, ALUInstrSet::LShift32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::RShift_a:
-		processALU(reg_a, ALUInstrSet::RShift32, reg_a);
-		instrAddrForward();
-		break;
-	case InstrSet::Comp0_a:
-		processALU(reg_a, ALUInstrSet::Comp032);
-		instrAddrForward();
-		break;
-	case InstrSet::Push_a:
+	case InstrSet::Push:
 		push(reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Pop_a:
+	case InstrSet::Pop:
 		pop(reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Load_a:
+
+	case InstrSet::Load:
 		instrAddrForward();
 		fetch();
 		reg_a->read32();
 		instrAddrForward();
 		break;
-	case InstrSet::LoadRel_a:
+	case InstrSet::LoadRel:
 		instrAddrForward();
 		fetch();
 		reg_mem->read_write32();
@@ -152,7 +118,7 @@ void CU::process() {
 		reg_a->read32();
 		instrAddrForward();
 		break;
-	case InstrSet::Store_a:
+	case InstrSet::Store:
 		instrAddrForward();
 		fetch();
 		reg_mem->read_write32();
@@ -160,129 +126,60 @@ void CU::process() {
 		ram->read32();
 		instrAddrForward();
 		break;
-	case InstrSet::Out_a:
+
+	case InstrSet::Out:
 		reg_a->write32();
 		out->process();
 		instrAddrForward();
 		break;
 
-	case InstrSet::Inc_b:
-		processALU(reg_b, ALUInstrSet::Inc32, reg_b);
+	case InstrSet::Add:
+		processALU(reg_0, reg_1, ALUInstrSet::Add32, reg_0);
 		instrAddrForward();
 		break;
-	case InstrSet::Dec_b:
-		processALU(reg_b, ALUInstrSet::Dec32, reg_b);
+	case InstrSet::Sub:
+		processALU(reg_a, reg_b, ALUInstrSet::Sub32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Neg_b:
-		processALU(reg_b, ALUInstrSet::Neg32, reg_b);
+	case InstrSet::Mul:
+		processALU(reg_a, reg_b, ALUInstrSet::Mul32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::LShift_b:
-		processALU(reg_b, ALUInstrSet::LShift32, reg_b);
+	case InstrSet::Div:
+		processALU(reg_a, reg_b, ALUInstrSet::Div32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::RShift_b:
-		processALU(reg_b, ALUInstrSet::RShift32, reg_b);
+	case InstrSet::Mod:
+		processALU(reg_a, reg_b, ALUInstrSet::Mod32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Comp0_b:
-		processALU(reg_b, ALUInstrSet::Comp032);
+	case InstrSet::LShift:
+		processALU(reg_a, reg_b, ALUInstrSet::VLShift32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Push_b:
-		push(reg_b);
+	case InstrSet::RShift:
+		processALU(reg_a, reg_b, ALUInstrSet::VRShift32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Pop_b:
-		pop(reg_b);
-		instrAddrForward();
-		break;
-	case InstrSet::Load_b:
-		instrAddrForward();
-		fetch();
-		reg_b->read32();
-		instrAddrForward();
-		break;
-	case InstrSet::LoadRel_b:
-		instrAddrForward();
-		fetch();
-		reg_mem->read_write32();
-		fetch();
-		reg_b->read32();
-		instrAddrForward();
-		break;
-	case InstrSet::Store_b:
-		instrAddrForward();
-		fetch();
-		reg_mem->read_write32();
-		reg_b->write32();
-		ram->read32();
-		instrAddrForward();
-		break;
-	case InstrSet::Out_b:
-		reg_b->write32();
-		out->process();
+	case InstrSet::Comp:
+		processALU(reg_a, reg_b, ALUInstrSet::Comp32);
 		instrAddrForward();
 		break;
 
-	case InstrSet::Inc_c:
-		processALU(reg_c, ALUInstrSet::Inc32, reg_c);
+	case InstrSet::Inc:
+		processALU(reg_a, ALUInstrSet::Inc32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Dec_c:
-		processALU(reg_c, ALUInstrSet::Dec32, reg_c);
+	case InstrSet::Dec:
+		processALU(reg_a, ALUInstrSet::Dec32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::Neg_c:
-		processALU(reg_c, ALUInstrSet::Neg32, reg_c);
+	case InstrSet::Neg:
+		processALU(reg_a, ALUInstrSet::Neg32, reg_a);
 		instrAddrForward();
 		break;
-	case InstrSet::LShift_c:
-		processALU(reg_c, ALUInstrSet::LShift32, reg_c);
-		instrAddrForward();
-		break;
-	case InstrSet::RShift_c:
-		processALU(reg_c, ALUInstrSet::RShift32, reg_c);
-		instrAddrForward();
-		break;
-	case InstrSet::Comp0_c:
-		processALU(reg_c, ALUInstrSet::Comp032);
-		instrAddrForward();
-		break;
-	case InstrSet::Push_c:
-		push(reg_c);
-		instrAddrForward();
-		break;
-	case InstrSet::Pop_c:
-		pop(reg_c);
-		instrAddrForward();
-		break;
-	case InstrSet::Load_c:
-		instrAddrForward();
-		fetch();
-		reg_c->read32();
-		instrAddrForward();
-		break;
-	case InstrSet::LoadRel_c:
-		instrAddrForward();
-		fetch();
-		reg_mem->read_write32();
-		fetch();
-		reg_c->read32();
-		instrAddrForward();
-		break;
-	case InstrSet::Store_c:
-		instrAddrForward();
-		fetch();
-		reg_mem->read_write32();
-		reg_c->write32();
-		ram->read32();
-		instrAddrForward();
-		break;
-	case InstrSet::Out_c:
-		reg_c->write32();
-		out->process();
+	case InstrSet::Comp0:
+		processALU(reg_a, ALUInstrSet::Comp032);
 		instrAddrForward();
 		break;
 
@@ -290,13 +187,59 @@ void CU::process() {
 		break;
 
 	default: 
-		std::cout << "Oups (unknown code: " << (int)bus_instr->extract() << ")"<< std::endl;
+		std::cout << "Oups (unknown code: " << (int)bus_instr->extract_h() << ")"<< std::endl;
 		std::cin.get();
 		exit(1);
 	}
 }
 
-void CU::prepareALU(MemoryControlFlow32* a, MemoryControlFlow32* b) {
+void CU::prepareALU(MemoryControlFlow32* a, MemoryControlFlow32* b, InstrSetTertiary part) {
+	switch(part) {
+	case InstrSetTertiary::x:
+		b->write32();
+		reg_alu_tmp->read_write32();
+		a->write32();
+		break;
+
+	case InstrSetTertiary::h:
+		b->write16h();
+		reg_alu_tmp->read_write32();
+		a->write32();
+		break;
+
+	case InstrSetTertiary::l:
+		b->write16l();
+		reg_alu_tmp->read_write32();
+		a->write32();
+		break;
+
+	case InstrSetTertiary::hh:
+		b->write8hh();
+		reg_alu_tmp->read_write32();
+		a->write32();
+		break;
+
+	case InstrSetTertiary::hl:
+		b->write8hl();
+		reg_alu_tmp->read_write32();
+		a->write32();
+		break;
+
+	case InstrSetTertiary::lh:
+		b->write8hl();
+		reg_alu_tmp->read_write32();
+		a->write32();
+		break;
+
+	case InstrSetTertiary::ll:
+		b->write8ll();
+		reg_alu_tmp->read_write8ll();
+		a->write32();
+		break;
+
+
+	}
+
 	b->write32();
 	reg_alu_tmp->read_write32();
 	a->write32();
