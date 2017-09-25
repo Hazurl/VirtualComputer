@@ -50,6 +50,11 @@ public:
 	virtual void read16h() = 0;
 	virtual void write16h() = 0;
 
+	virtual void read8hh() = 0;
+	virtual void read8hl() = 0;
+	virtual void write8hh() = 0;
+	virtual void write8hl() = 0;
+
 	void read_write16h() {
 		read16h();
 		write16h();
@@ -58,6 +63,16 @@ public:
 	void read_write32() {
 		read32();
 		write32();
+	}
+
+	void read_write8hh() {
+		read8hh();
+		write8hh();
+	}
+	
+	void read_write8hl() {
+		read8hl();
+		write8hl();
 	}
 };
 

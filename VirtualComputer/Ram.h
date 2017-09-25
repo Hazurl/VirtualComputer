@@ -16,26 +16,52 @@ public:
 	}
 	
 	void read8() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = bus_data->extract_ll();
+		udword addr = static_cast<udword>(bus_addr->extract_32());
+		byte data = bus_data->extract_8();
 
 		memory[addr] = data;
 	}
-	
+
 	void read8h() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = bus_data->extract_lh();
+		udword addr = static_cast<udword>(bus_addr->extract_32());
+		byte data = bus_data->extract_8();
 
 		memory[addr] = data;
 	}
-	
+
 	void write8() override {
 		udword addr = static_cast<udword>(bus_addr->extract());
 		byte data = memory[addr];
 		bus_data->bind_ll(data);
 	}
-	
+
 	void write8h() override {
+		udword addr = static_cast<udword>(bus_addr->extract());
+		byte data = memory[addr];
+		bus_data->bind_lh(data);
+	}
+
+	void read8hl() override {
+		udword addr = static_cast<udword>(bus_addr->extract());
+		byte data = bus_data->extract_ll();
+
+		memory[addr] = data;
+	}
+
+	void read8hh() override {
+		udword addr = static_cast<udword>(bus_addr->extract());
+		byte data = bus_data->extract_lh();
+
+		memory[addr] = data;
+	}
+
+	void write8hl() override {
+		udword addr = static_cast<udword>(bus_addr->extract());
+		byte data = memory[addr];
+		bus_data->bind_ll(data);
+	}
+
+	void write8hh() override {
 		udword addr = static_cast<udword>(bus_addr->extract());
 		byte data = memory[addr];
 		bus_data->bind_lh(data);

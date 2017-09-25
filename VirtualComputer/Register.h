@@ -52,6 +52,11 @@ public:
 	void write8() override;
 	void write8h() override;
 
+	void read8hl() override;
+	void read8hh() override;
+	void write8hl() override;
+	void write8hh() override;
+
 	void read16() override;
 	void read16h() override;
 	void write16() override;

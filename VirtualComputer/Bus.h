@@ -7,8 +7,8 @@ BEGIN_NS
 class Bus8 {
 public:
 
-	void bind(byte b);
-	byte extract() const;
+	void bind_8(byte b);
+	byte extract_8() const;
 
 	struct bit_t {
 	private:
@@ -37,19 +37,15 @@ private:
 
 class Bus16 {
 public:
-	void bind(byte h, byte l);
-	void bind_h(byte b);
-	void bind_l(byte b);
-	void bind(word b);
+	void bind_8(byte b);
+	void bind_16(word b);
 
-	byte extract_h() const;
-	byte extract_l() const;
-	word extract() const;
+	byte extract_8() const;
+	word extract_16() const;
 
 	Bus8::bit_t bit(ubyte p);
 
-	Bus8& bus_h();
-	Bus8& bus_l();
+	Bus8& bus_8();
 
 private:
 
@@ -59,32 +55,18 @@ private:
 
 class Bus32 {
 public:
-	void bind(byte hh, byte hl, byte lh, byte ll);
-	void bind_hh(byte hh);
-	void bind_hl(byte hl);
-	void bind_lh(byte lh);
-	void bind_ll(byte ll);
-	void bind(word h, word l);
-	void bind_h(word h);
-	void bind_l(word l);
-	void bind(dword b);
+	void bind_8(byte ll);
+	void bind_16(word h);
+	void bind_32(dword b);
 
-	byte extract_hh() const;
-	byte extract_hl() const;
-	byte extract_lh() const;
-	byte extract_ll() const;
-	word extract_h() const;
-	word extract_l() const;
-	dword extract() const;
+	byte extract_8() const;
+	word extract_16() const;
+	dword extract_32() const;
 
 	Bus8::bit_t bit(ubyte p);
 
-	Bus8& bus_hh();
-	Bus8& bus_hl();
-	Bus8& bus_lh();
-	Bus8& bus_ll();
-	Bus16& bus_h();
-	Bus16& bus_l();
+	Bus8& bus_8();
+	Bus16& bus_16();
 
 private:
 
