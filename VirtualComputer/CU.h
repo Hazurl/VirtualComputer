@@ -7,6 +7,7 @@
 #include "Processable.h"
 #include "MemoryControlFlow.h"
 #include "InstrSet.h"
+#include "InstrSetUnknown.h"
 
 BEGIN_NS
 
@@ -21,41 +22,40 @@ public:
 
 private:
 
-	void prepareALU(MemoryControlFlow32* a, MemoryControlFlow32* b);
-	void prepareALU(MemoryControlFlow32* a);
-	void callALU(ALUInstrSet instr);
-	void ALURes_to(MemoryControlFlow32* a);
+	void CU::processALU(InstrTarget t0, InstrTarget t1, ALUInstrSet b8, ALUInstrSet b16, ALUInstrSet b32, bool result = true);
+	void CU::processALU(InstrTarget t0, ALUInstrSet b8, ALUInstrSet b16, ALUInstrSet b32, bool result = true);
 
-	inline void processALU(MemoryControlFlow32* a, MemoryControlFlow32* b, ALUInstrSet instr, MemoryControlFlow32* res) {
-		prepareALU(a, b);
-		callALU(instr);
-		ALURes_to(a);
-	}
+	void is_defer(InstrTarget t0, InstrTarget t1);
+	void is_comp(InstrTarget t0, InstrTarget t1);
+	void is_comp0(InstrTarget t0, InstrTarget t1);
+	void is_add(InstrTarget t0, InstrTarget t1);
+	void is_sub(InstrTarget t0, InstrTarget t1);
+	void is_mul(InstrTarget t0, InstrTarget t1);
+	void is_div(InstrTarget t0, InstrTarget t1);
+	void is_mod(InstrTarget t0, InstrTarget t1);
+	void is_inc(InstrTarget t0, InstrTarget t1);
+	void is_dec(InstrTarget t0, InstrTarget t1);
+	void is_neg(InstrTarget t0, InstrTarget t1);
+	void is_lshift(InstrTarget t0, InstrTarget t1);
+	void is_rshift(InstrTarget t0, InstrTarget t1);
+	void is_push(InstrTarget t0, InstrTarget t1);
+	void is_pop(InstrTarget t0, InstrTarget t1);
+	void is_load(InstrTarget t0, InstrTarget t1);
+	void is_store(InstrTarget t0, InstrTarget t1);
+	void is_out(InstrTarget t0, InstrTarget t1);
+	void is_jmp(InstrTarget t0, InstrTarget t1, bool value);
 
-	inline void processALU(MemoryControlFlow32* a, ALUInstrSet instr, MemoryControlFlow32* res) {
-		prepareALU(a);
-		callALU(instr);
-		ALURes_to(a);
-	}
-
-	inline void processALU(MemoryControlFlow32* a, MemoryControlFlow32* b, ALUInstrSet instr) {
-		prepareALU(a, b);
-		callALU(instr);
-	}
-
-	inline void processALU(MemoryControlFlow32* a, ALUInstrSet instr) {
-		prepareALU(a);
-		callALU(instr);
-	}
-
-	void instrAddrForward();
-	void fetch();
-	void jmp_if(bool value);
 	bool is_flag(ALUFlag f);
 	bool is_not_flag(ALUFlag f);
 
-	void push(MemoryControlFlow32* reg);
-	void pop(MemoryControlFlow32* reg);
+	bool is_reg(InstrTarget t);
+	ubyte target_size(InstrTarget t);
+
+	void target_read(InstrTarget t);
+	void target_write(InstrTarget t);
+
+	void instrAddrForward();
+	void fetch();
 
 	Processable* alu;
 	Processable* out;

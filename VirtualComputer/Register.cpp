@@ -32,19 +32,19 @@ void Register16::read16() {
 }
 
 void Register16::read8h() {
-	storage = (storage & 0x00FF) | input->extract_8();
+	storage = bin::join(input->extract_8(), bin::lsb(storage));
 }
 
 void Register16::write8h() {
-	output->bind_8((storage & 0xFF00) >> 8);
+	output->bind_8(bin::msb(storage));
 }
 
 void Register16::read8() {
-	storage = (storage & 0xFF00) | (input->extract_8() << 8);
+	storage = bin::join(bin::msb(storage), input->extract_8());
 }
 
 void Register16::write8() {
-	output->bind_8(storage & 0x00FF);
+	output->bind_8(bin::lsb(storage));
 }
 
 // Register 32
@@ -62,51 +62,63 @@ void Register32::read32() {
 }
 
 void Register32::read8() {
-	storage = (storage & 0xFFFFFF00) | input->extract_8();
+	storage = bin::join(
+		bin::msb(storage), bin::join(
+		bin::msb(bin::lsb(storage)), 
+		input->extract_8()));
 }
 
 void Register32::read8h() {
-	storage = (storage & 0xFFFF00FF) | (input->extract_8() << 8);
+	storage = bin::join(
+		bin::msb(storage), bin::join(
+		input->extract_8(), 
+		bin::lsb(bin::lsb(storage))));
 }
 
 void Register32::write8() {
-	output->bind_8(storage & 0x000000FF);
+	output->bind_8(bin::lsb(bin::lsb(storage)));
 }
 
 void Register32::write8h() {
-	output->bind_8((storage & 0x0000FF00) >> 8);
+	output->bind_8(bin::msb(bin::lsb(storage)));
 }
 
 void Register32::read8hl() {
-	storage = (storage & 0xFF00FFFF) | (input->extract_8() << 16);
+	storage = bin::join(bin::join(
+		bin::msb(bin::msb(storage)), 
+		input->extract_8()), 
+		bin::lsb(storage));
 }
 
 void Register32::read8hh() {
-	storage = (storage & 0x00FFFFFF) | (input->extract_8() << 24);
+	storage = bin::join(bin::join(
+		input->extract_8(),
+		bin::lsb(bin::msb(storage))), 
+		bin::lsb(storage));
 }
 
 void Register32::write8hl() {
-	output->bind_8((storage & 0x00FF0000) >> 16);
+	output->bind_8(bin::lsb(bin::msb(storage)));
 }
 
 void Register32::write8hh() {
-	output->bind_8((storage & 0xFF000000) >> 24);
+	output->bind_8(bin::msb(bin::msb(storage)));
 }
 
 void Register32::read16() {
-	storage = (storage & 0xFFFF0000) | input->extract_16();
+	storage = bin::join(bin::msb(storage), input->extract_16());
 }
 
 void Register32::read16h() {
-	storage = (storage & 0x0000FFFF) | (input->extract_16() << 16);
+	storage = bin::join(input->extract_16(), bin::lsb(storage));
 }
 
 void Register32::write16() {
-	output->bind_16(storage & 0x0000FFFF);
+	output->bind_16(bin::lsb(storage));
 }
 
 void Register32::write16h() {
-	output->bind_16((storage & 0xFFFF0000) >> 16);
+	output->bind_16(bin::msb(storage));
 }
 
 END_NS

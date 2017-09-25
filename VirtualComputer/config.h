@@ -9,40 +9,54 @@
 
 BEGIN_NS
 
-using byte = int8_t;
-using ubyte = uint8_t;
+template<typename T>
+struct unsigned_t_helper;
+template<typename T>
+struct signed_t_helper;
 
-constexpr byte byte_min = std::numeric_limits<int8_t>::min();
-constexpr byte byte_max = std::numeric_limits<int8_t>::max();
+#define TYPE_MIN_MAX(t, s)\
+using t = int ## s ## _t;\
+using u ## t = uint ## s ## _t;\
+constexpr t t ## _min = std::numeric_limits<int ## s ## _t>::min();\
+constexpr t t ## _max = std::numeric_limits<int ## s ## _t>::max();\
+constexpr u ## t u ## t ## _min = std::numeric_limits<uint ## s ## _t>::min();\
+constexpr u ## t u ## t ## _max = std::numeric_limits<uint ## s ## _t>::max();\
+template<>\
+struct unsigned_t_helper<t> {\
+	using type = u ## t; \
+};\
+template<>\
+struct unsigned_t_helper<u ## t> {\
+	using type = u ## t; \
+};\
+template<>\
+struct signed_t_helper<t> {\
+	using type = t; \
+};\
+template<>\
+struct signed_t_helper<u ## t> {\
+	using type = t; \
+};
 
-constexpr ubyte ubyte_min = std::numeric_limits<uint8_t>::min();
-constexpr ubyte ubyte_max = std::numeric_limits<uint8_t>::max();
 
-using word = int16_t;
-using uword = uint16_t;
+template<typename T>
+using unsigned_t = typename unsigned_t_helper<T>::type;
+template<typename T>
+using signed_t = typename signed_t_helper<T>::type;
 
-constexpr word word_min = std::numeric_limits<int16_t>::min();
-constexpr word word_max = std::numeric_limits<int16_t>::max();
+TYPE_MIN_MAX(byte, 8)
+TYPE_MIN_MAX(word, 16)
+TYPE_MIN_MAX(dword, 32)
+TYPE_MIN_MAX(xdword, 64)
 
-constexpr uword uword_min = std::numeric_limits<uint16_t>::min();
-constexpr uword uword_max = std::numeric_limits<uint16_t>::max();
+template<typename T>
+inline unsigned_t<T> us_cast(T const& t) {
+	return static_cast<unsigned_t<T>>(t);
+}
 
-using dword = int32_t;
-using udword = uint32_t;
-
-constexpr dword dword_min = std::numeric_limits<int32_t>::min();
-constexpr dword dword_max = std::numeric_limits<int32_t>::max();
-
-constexpr udword udword_min = std::numeric_limits<uint32_t>::min();
-constexpr udword udword_max = std::numeric_limits<uint32_t>::max();
-
-using xdword = int64_t;
-using uxdword = uint64_t;
-
-constexpr xdword xdword_min = std::numeric_limits<int64_t>::min();
-constexpr xdword xdword_max = std::numeric_limits<int64_t>::max();
-
-constexpr uxdword uxdword_min = std::numeric_limits<uint64_t>::min();
-constexpr uxdword uxdword_max = std::numeric_limits<uint64_t>::max();
+template<typename T>
+inline signed_t<T> s_cast(T const& t) {
+	return static_cast<signed_t<T>>(t);
+}
 
 END_NS

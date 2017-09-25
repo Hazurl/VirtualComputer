@@ -139,11 +139,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ALU.h" />
+    <ClInclude Include="ALUInstrSetUnknown.h" />
+    <ClInclude Include="Bin.h" />
     <ClInclude Include="Bus.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="CU.h" />
     <ClInclude Include="InstrSet.h" />
+    <ClInclude Include="InstrSetUnknown.h" />
+    <ClInclude Include="WrongUtilisationRam.h" />
     <ClInclude Include="MachineCode.h" />
     <ClInclude Include="MachineCodeHelper.h" />
     <ClInclude Include="MemoryControlFlow.h" />

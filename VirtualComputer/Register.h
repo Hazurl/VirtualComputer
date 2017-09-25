@@ -3,6 +3,7 @@
 #include "config.h"
 #include "Bus.h"
 #include "MemoryControlFlow.h"
+#include "Bin.h"
 
 BEGIN_NS
 

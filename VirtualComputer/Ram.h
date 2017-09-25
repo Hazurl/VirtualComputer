@@ -4,6 +4,8 @@
 #include "MemoryControlFlow.h"
 #include "Bus.h"
 #include "CU.h"
+#include "Bin.h"
+#include "WrongUtilisationRam.h"
 
 BEGIN_NS
 
@@ -16,14 +18,7 @@ public:
 	}
 	
 	void read8() override {
-		udword addr = static_cast<udword>(bus_addr->extract_32());
-		byte data = bus_data->extract_8();
-
-		memory[addr] = data;
-	}
-
-	void read8h() override {
-		udword addr = static_cast<udword>(bus_addr->extract_32());
+		udword addr = us_cast(bus_addr->extract_32());
 		byte data = bus_data->extract_8();
 
 		memory[addr] = data;
@@ -35,62 +30,17 @@ public:
 		bus_data->bind_ll(data);
 	}
 
-	void write8h() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = memory[addr];
-		bus_data->bind_lh(data);
-	}
-
-	void read8hl() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = bus_data->extract_ll();
-
-		memory[addr] = data;
-	}
-
-	void read8hh() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = bus_data->extract_lh();
-
-		memory[addr] = data;
-	}
-
-	void write8hl() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = memory[addr];
-		bus_data->bind_ll(data);
-	}
-
-	void write8hh() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		byte data = memory[addr];
-		bus_data->bind_lh(data);
-	}
-
 	void read16() override {
 		udword addr = static_cast<udword>(bus_addr->extract());
 		word data = bus_data->extract_l();
 
 		reinterpret_cast<word&>(memory[addr]) = data;
 	}
-	
-	void read16h() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		word data = bus_data->extract_h();
 
-		reinterpret_cast<word&>(memory[addr]) = data;
-	}
-	
 	void write16() override {
 		udword addr = static_cast<udword>(bus_addr->extract());
 		word data = reinterpret_cast<word&>(memory[addr]);
 		bus_data->bind_l(data);
-	}
-	
-	void write16h() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		word data = reinterpret_cast<word&>(memory[addr]);
-		bus_data->bind_h(data);
 	}
 
 	void read32() override {
@@ -105,6 +55,39 @@ public:
 		dword data = reinterpret_cast<dword&>(memory[addr]);
 		bus_data->bind(data);
 	}
+
+	void read8h() override {
+		throw WrongRamUtilisation();
+	}
+
+	void write8h() override {
+		throw WrongRamUtilisation();
+	}
+
+	void read8hl() override {
+		throw WrongRamUtilisation();
+	}
+
+	void read8hh() override {
+		throw WrongRamUtilisation();
+	}
+
+	void write8hl() override {
+		throw WrongRamUtilisation();
+	}
+
+	void write8hh() override {
+		throw WrongRamUtilisation();
+	}
+
+	void read16h() override {
+		throw WrongRamUtilisation();
+	}
+	
+	void write16h() override {
+		throw WrongRamUtilisation();
+	}
+
 
 	udword reserve(udword _size) {
 		if(ptr_avalaible + _size > size) {

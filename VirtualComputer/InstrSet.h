@@ -50,10 +50,8 @@ enum class ALUInstrSet : ubyte {
 	Neg32,		// 1 arg : -a
 	Inc32,		// 1 arg : a + 1 
 	Dec32,		// 1 arg : a - 1
-	LShift32,	// 1 arg : a << 1
-	RShift32,	// 1 arg : a >> 1
-	VLShift32,	// 2 arg : a << b
-	VRShift32,	// 2 arg : a >> b
+	LShift32,	// 1 arg : a << b
+	RShift32,	// 1 arg : a >> b
 	Comp32,		// 2 arg : a ? b
 	Comp032,	// 1 arg : a ? 0
 };
@@ -74,33 +72,25 @@ enum class InstrSet : uword {
 	Comp, Comp0,
 	Add, Sub,
 	Mul, Div, Mod,
-	Move,
 	Inc, Dec,
 	Neg, 
 	LShift, RShift,
 	Push, Pop,
-	Load, LoadRel, Store,
+	Load, Store,
 	Out
 };
 
-enum class InstrSetSecondary : ubyte {
-	Ra, Rb, Rc,
-	Rab, Rba,
-	Rac, Rca,
-	Rbc, Rcb,
-	RelAddr, Addr,
+enum class InstrTarget : ubyte {
+	a32, b32, c32,
+	a16, b16, c16,
+	a16h, b16h, c16h,
+	a8, b8, c8,
+	a8hh, b8hh, c8hh,
+	a8lh, b8lh, c8lh,
+	a8hl, b8hl, c8hl,
+
+	Addr,
 	Value,
-};
-
-enum class InstrSetTertiary : ubyte {
-	ll, lh, hl, hh, h, l, x,
-	
-	ll_lh, ll_hl, ll_hh,
-	lh_ll, lh_hl, lh_hh,
-	hl_ll, hl_lh, hl_hh,
-	hh_ll, hh_lh, hh_hl,
-
-	l_h, h_l,
 };
 
 inline dword dwordv(InstrSet s) {

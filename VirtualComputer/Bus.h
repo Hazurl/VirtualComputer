@@ -1,6 +1,7 @@
 #pragma once
 
 #include "config.h"
+#include "Bin.h"
 
 BEGIN_NS
 
@@ -9,33 +10,14 @@ public:
 
 	void bind_8(byte b);
 	byte extract_8() const;
-
-	struct bit_t {
-	private:
-		byte& b;
-		ubyte p;
-	public:
-		bit_t(byte& b, ubyte p) : b(b), p(p) {}
-		bit_t& operator = (ubyte v) {
-			if(v)
-				b |= 1 << p;
-			else
-				b &= ~(1 << p);
-			return *this;
-		}
-
-		operator bool() {
-			return b & (1 << p);
-		}
-	};
 	
-	bit_t bit(ubyte b);
+	bin::bit_t bit(ubyte b);
 
 private:
-	byte storage = 0;
+	byte storage;
 };
 
-class Bus16 {
+class Bus16 : public Bus8 {
 public:
 	void bind_8(byte b);
 	void bind_16(word b);
@@ -43,17 +25,14 @@ public:
 	byte extract_8() const;
 	word extract_16() const;
 
-	Bus8::bit_t bit(ubyte p);
-
-	Bus8& bus_8();
+	bin::bit_t bit(ubyte p);
 
 private:
 
-	Bus8 h;
-	Bus8 l;
+	byte h;
 };
 
-class Bus32 {
+class Bus32 : public Bus16 {
 public:
 	void bind_8(byte ll);
 	void bind_16(word h);
@@ -63,15 +42,11 @@ public:
 	word extract_16() const;
 	dword extract_32() const;
 
-	Bus8::bit_t bit(ubyte p);
-
-	Bus8& bus_8();
-	Bus16& bus_16();
+	bin::bit_t bit(ubyte p);
 
 private:
 
-	Bus16 h;
-	Bus16 l;
+	word h;
 };
 
 END_NS

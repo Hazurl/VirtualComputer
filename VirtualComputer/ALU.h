@@ -4,6 +4,7 @@
 #include "Bus.h"
 #include "Processable.h"
 #include "InstrSet.h"
+#include "ALUInstrSetUnknown.h"
 
 BEGIN_NS
 

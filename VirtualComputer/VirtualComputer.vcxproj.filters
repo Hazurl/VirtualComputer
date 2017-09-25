@@ -40,6 +40,9 @@
     <Filter Include="Fichiers sources\Hardware\Memory">
       <UniqueIdentifier>{3dada565-54b9-4e85-a458-317f0ce11381}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers d%27en-tête\Exception">
+      <UniqueIdentifier>{1d7254b9-c478-4ba4-b3cb-985922842a7c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -89,6 +92,18 @@
     </ClInclude>
     <ClInclude Include="InstrSet.h">
       <Filter>Fichiers d%27en-tête\Hardware\CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="Bin.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="WrongUtilisationRam.h">
+      <Filter>Fichiers d%27en-tête\Exception</Filter>
+    </ClInclude>
+    <ClInclude Include="InstrSetUnknown.h">
+      <Filter>Fichiers d%27en-tête\Exception</Filter>
+    </ClInclude>
+    <ClInclude Include="ALUInstrSetUnknown.h">
+      <Filter>Fichiers d%27en-tête\Exception</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
