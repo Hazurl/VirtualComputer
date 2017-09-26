@@ -16,8 +16,9 @@ public:
 	CU(MemoryControlFlow32* ram, Processable* alu, Processable* out, MemoryControlFlow32* reg_mem, MemoryControlFlow8* reg_flag, Bus8* bus_flag,
 	   MemoryControlFlow32* reg_instr, Bus32* bus_instr, MemoryControlFlow32* reg_instr_addr, Bus8* bus_alu, MemoryControlFlow32* reg_alu_res,
 	   MemoryControlFlow32* reg_alu_tmp, MemoryControlFlow32* reg_a, MemoryControlFlow32* reg_b, MemoryControlFlow32* reg_c,
-	   MemoryControlFlow32* reg_seg_instr, MemoryControlFlow32* reg_seg_stack, MemoryControlFlow32* reg_stack_ptr);
+	   MemoryControlFlow32* reg_seg_instr, MemoryControlFlow32* reg_seg_stack, MemoryControlFlow32* reg_stack_ptr, MemoryControlFlow32* reg_seg_data, MemoryControlFlow32* reg_seg_bss);
 
+	bool halted = false;
 	void process() override;
 
 private:
@@ -25,7 +26,8 @@ private:
 	void CU::processALU(InstrTarget t0, InstrTarget t1, ALUInstrSet b8, ALUInstrSet b16, ALUInstrSet b32, bool result = true);
 	void CU::processALU(InstrTarget t0, ALUInstrSet b8, ALUInstrSet b16, ALUInstrSet b32, bool result = true);
 
-	void is_defer(InstrTarget t0, InstrTarget t1);
+	void is_deferdata(InstrTarget t0, InstrTarget t1);
+	void is_deferbss(InstrTarget t0, InstrTarget t1);
 	void is_comp(InstrTarget t0, InstrTarget t1);
 	void is_comp0(InstrTarget t0, InstrTarget t1);
 	void is_add(InstrTarget t0, InstrTarget t1);
@@ -81,6 +83,8 @@ private:
 	MemoryControlFlow32* reg_seg_instr;
 	MemoryControlFlow32* reg_seg_stack;
 	MemoryControlFlow32* reg_stack_ptr;
+	MemoryControlFlow32* reg_seg_data;
+	MemoryControlFlow32* reg_seg_bss;
 };
 
 END_NS

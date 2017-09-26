@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MachineCode.h"
+#include "Bin.h"
 
 BEGIN_NS
 
@@ -7,28 +8,25 @@ MachineCode::Instr::Instr(Instr:: State s, dword b) : state(s), cmd(b) {
 
 }
 
-std::vector<dword> MachineCode::generate(dword* linker) {
-	std::vector<dword> gen;
+MachineCode::Generated MachineCode::generate() {
+	MachineCode::Generated g;
 	std::unordered_map<byte, byte> labels; // id -> mem
 	std::unordered_map<byte, byte> go_tos; // id -> mem
 	for(auto& i : code) {
 		switch(i.state) {
 		case Instr::State::cmd:
-			gen.emplace_back(i.cmd);
-			break;
-		case Instr::State::link:
-			gen.emplace_back(linker[i.cmd]);
+			g.code.emplace_back(i.cmd);
 			break;
 		case Instr::State::label:
-			labels.emplace(i.cmd, (gen.size() - 1) * sizeof(dword));
+			labels.emplace(i.cmd, (g.code.size() - 1) * sizeof(dword));
 			break;
 		case Instr::State::label_addr:
 			auto it = labels.find(i.cmd);
 			if(it != labels.end())
-				gen.emplace_back(it->second + sizeof(dword));
+				g.code.emplace_back(it->second + sizeof(dword));
 			else {
-				go_tos.emplace(i.cmd, gen.size());
-				gen.emplace_back(0);
+				go_tos.emplace(i.cmd, g.code.size());
+				g.code.emplace_back(0);
 			}
 			break;
 		}
@@ -38,14 +36,26 @@ std::vector<dword> MachineCode::generate(dword* linker) {
 		auto it = labels.find(p.first);
 		if(it == labels.end())
 			return {};
-		gen[p.second] = it->second;
+		g.code[p.second] = it->second;
 	}
 
-	return gen;
+	g.stack_size = wanted_stack_size;
+	g.bss_size = wanted_bss_size;
+	g.data = data;
+	g.entry_point = 0;
+	return g;
 }
 
 void MachineCode::command(InstrSet cmd) {
-	command(static_cast<dword>(cmd));
+	command(bin::join(static_cast<word>(cmd), static_cast<word>(0)));
+}
+
+void MachineCode::command(InstrSet cmd, InstrTarget t0) {
+	command(bin::join(static_cast<word>(cmd), bin::join(static_cast<byte>(t0), static_cast<byte>(0))));
+}
+
+void MachineCode::command(InstrSet cmd, InstrTarget t0, InstrTarget t1) {
+	command(bin::join(static_cast<word>(cmd), bin::join(static_cast<byte>(t0), static_cast<byte>(t1))));
 }
 
 void MachineCode::command(dword cmd) {
@@ -56,12 +66,36 @@ void MachineCode::go_to(byte label) {
 	code.emplace_back(Instr::State::label_addr, label);
 }
 
-void MachineCode::link(byte id) {
-	code.emplace_back(Instr::State::link, id);
-}
-
 void MachineCode::label(byte id) {
 	code.emplace_back(Instr::State::label, id);
+}
+
+void MachineCode::request_stack(udword s) {
+	wanted_stack_size = s;
+}
+
+void MachineCode::request_bss(udword s) {
+	wanted_bss_size = s;
+}
+
+void MachineCode::add_data(std::vector<byte> d) {
+	for(auto const& b : d) {
+		add_data_8(b);
+	}
+}
+
+void MachineCode::add_data_8(byte b) {
+	data.push_back(b);
+}
+
+void MachineCode::add_data_16(word b) {
+	add_data_8(bin::lsb(b));
+	add_data_8(bin::msb(b));
+}
+
+void MachineCode::add_data_32(dword b) {
+	add_data_16(bin::lsb(b));
+	add_data_16(bin::msb(b));
 }
 
 END_NS

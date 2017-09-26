@@ -34,7 +34,7 @@ void Bus16::bind_8(byte b) {
 }
 
 byte Bus16::extract_8() const {
-	Bus8::extract_8();
+	return Bus8::extract_8();
 }
 
 word Bus16::extract_16() const {

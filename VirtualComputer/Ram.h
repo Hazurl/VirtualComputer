@@ -21,39 +21,45 @@ public:
 		udword addr = us_cast(bus_addr->extract_32());
 		byte data = bus_data->extract_8();
 
+//		std::cout << "RAM[" << addr << "]_8 << " << (dword)data << std::endl;
 		memory[addr] = data;
 	}
 
 	void write8() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
+		udword addr = static_cast<udword>(bus_addr->extract_32());
 		byte data = memory[addr];
-		bus_data->bind_ll(data);
+//		std::cout << "RAM[" << addr << "]_8 >> " << (dword)data << std::endl;
+		bus_data->bind_8(data);
 	}
 
 	void read16() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		word data = bus_data->extract_l();
+		udword addr = static_cast<udword>(bus_addr->extract_32());
+		word data = bus_data->extract_16();
 
+//		std::cout << "RAM[" << addr << "]_16 << " << (dword)data << std::endl;
 		reinterpret_cast<word&>(memory[addr]) = data;
 	}
 
 	void write16() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
+		udword addr = static_cast<udword>(bus_addr->extract_32());
 		word data = reinterpret_cast<word&>(memory[addr]);
-		bus_data->bind_l(data);
+//		std::cout << "RAM[" << addr << "]_16 >> " << (dword)data << std::endl;
+		bus_data->bind_16(data);
 	}
 
 	void read32() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
-		dword data = bus_data->extract();
+		udword addr = static_cast<udword>(bus_addr->extract_32());
+		dword data = bus_data->extract_32();
 
+//		std::cout << "RAM[" << addr << "]_32 << " << (dword)data << std::endl;
 		reinterpret_cast<dword&>(memory[addr]) = data;
 	}
 
 	void write32() override {
-		udword addr = static_cast<udword>(bus_addr->extract());
+		udword addr = static_cast<udword>(bus_addr->extract_32());
 		dword data = reinterpret_cast<dword&>(memory[addr]);
-		bus_data->bind(data);
+//		std::cout << "RAM[" << addr << "]_32 >> " << (dword)data << std::endl;
+		bus_data->bind_32(data);
 	}
 
 	void read8h() override {
@@ -100,14 +106,17 @@ public:
 	}
 
 	void load_at(udword addr, byte value) {
+//		std::cout << "RAM[" << addr << "]_8 << " << (dword)value << std::endl;
 		memory[addr] = value;
 	}
 
 	void load_at(udword addr, word value) {
+//		std::cout << "RAM[" << addr << "]_16 << " << (dword)value << std::endl;
 		reinterpret_cast<word&>(memory[addr]) = value;
 	}
 
 	void load_at(udword addr, dword value) {
+//		std::cout << "RAM[" << addr << "]_32 << " << (dword)value<< std::endl;
 		reinterpret_cast<dword&>(memory[addr]) = value;
 	}
 

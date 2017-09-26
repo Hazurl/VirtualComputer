@@ -4,6 +4,8 @@
 #include "Processable.h"
 #include "Bus.h"
 
+#include <iostream>
+
 BEGIN_NS
 
 enum class OutConsoleMode {
@@ -18,14 +20,13 @@ enum class OutConsoleBetween {
 	Nothing
 };
 
-template<OutConsoleMode mode, OutConsoleBetween between>
 class OutConsole : public Processable {
 public:
 
-	OutConsole(Bus32* bus_data) : bus_data(bus_data) {}
+	OutConsole(OutConsoleMode mode, OutConsoleBetween bet, Bus32* bus_data) : bus_data(bus_data), mode(mode), bet(bet) {}
 
 	void OutConsole::process() {
-		dword data = bus_data->extract();
+		dword data = bus_data->extract_32();
 		switch(mode) {
 		case vphaz::OutConsoleMode::Binary:
 			for(byte i = 31; i >= 0; --i)
@@ -39,7 +40,7 @@ public:
 			break;
 		}
 		
-		switch(between) {
+		switch(bet) {
 		case vphaz::OutConsoleBetween::Space:
 			std::cout << " ";
 			break;
@@ -51,12 +52,17 @@ public:
 		}
 	}
 
+	void change_mode(OutConsoleMode mode, OutConsoleBetween bet) {
+		this->mode = mode;
+		this->bet = bet;
+	}
+
 private:
 
 	Bus32* bus_data;
-};
 
-using OutConsoleChar = OutConsole<OutConsoleMode::Char, OutConsoleBetween::Nothing>;
-using OutConsoleBinary= OutConsole<OutConsoleMode::Binary, OutConsoleBetween::Endl>;
+	OutConsoleMode mode;
+	OutConsoleBetween bet;
+};
 
 END_NS

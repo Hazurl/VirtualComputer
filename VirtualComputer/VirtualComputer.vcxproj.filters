@@ -66,9 +66,6 @@
     <ClInclude Include="Processable.h">
       <Filter>Fichiers d%27en-tête\Hardware</Filter>
     </ClInclude>
-    <ClInclude Include="Register.h">
-      <Filter>Fichiers d%27en-tête\Hardware</Filter>
-    </ClInclude>
     <ClInclude Include="ALU.h">
       <Filter>Fichiers d%27en-tête\Hardware\CPU</Filter>
     </ClInclude>
@@ -105,6 +102,9 @@
     <ClInclude Include="ALUInstrSetUnknown.h">
       <Filter>Fichiers d%27en-tête\Exception</Filter>
     </ClInclude>
+    <ClInclude Include="Register.h">
+      <Filter>Fichiers d%27en-tête\Hardware\Memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -132,7 +132,7 @@
       <Filter>Fichiers sources\Hardware\CPU</Filter>
     </ClCompile>
     <ClCompile Include="Register.cpp">
-      <Filter>Fichiers sources\Hardware</Filter>
+      <Filter>Fichiers sources\Hardware\Memory</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

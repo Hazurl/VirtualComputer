@@ -15,51 +15,51 @@
 #include <iostream>
 #include <vector>
 
-int main() {
-	using namespace NAMESPACE;
+using namespace NAMESPACE;
 
+template<unsigned int RS>
+void startCode(MachineCode code, Ram<RS>* ram, CPU* cpu) {
+	udword seg_instr, seg_data, seg_bss, seg_stack, entry_point;
+
+	ram->clean();
+	MachineCodeHelper::load_to_ram(ram, &code, seg_instr, seg_data, seg_bss, seg_stack, entry_point);
+	/*
+	std::cout << "Segments: " << std::endl;
+	std::cout << "\tInstructions " << seg_instr << std::endl;
+	std::cout << "\tData " << seg_data << std::endl;
+	std::cout << "\tBss " << seg_bss << std::endl;
+	std::cout << "\tStack " << seg_stack << std::endl;
+	*/
+	cpu->define_program(seg_instr, seg_data, seg_bss, seg_stack, entry_point);
+	cpu->start_program();
+}
+
+int main() {
 	Bus32 bus_data;
 	Bus32 bus_addr;
 	Ram<1 << 16> ram(&bus_data, &bus_addr);
-	OutConsole<OutConsoleMode::Int, OutConsoleBetween::Space> out(&bus_data);
+	OutConsole out(OutConsoleMode::Int, OutConsoleBetween::Space, &bus_data);
 	//OutConsole<OutConsoleMode::Binary, OutConsoleBetween::Space> out(&bus_data);
 	CPU cpu(&bus_data, &bus_addr, &ram, &out);
 
-	if (true) {
-		MachineCode code = MachineCodeHelper::generate_counter();
-		udword seg_instr, seg_stack;
-		dword linker[] = { 10 };
+	if (true)
+		startCode(MachineCodeHelper::generate_counter(), &ram, &cpu);
 
-		ram.clean();
-		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
-
-		cpu.define_program(seg_instr, seg_stack);
-		cpu.start_program();
-	}
 	std::cout << std::endl << std::endl;
-	if(true){
-		MachineCode code = MachineCodeHelper::generate_for_in_range();
-		udword seg_instr, seg_stack;
-		dword linker[] = { 120, 130 };
 
-		ram.clean();
-		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+	if(true)
+		startCode(MachineCodeHelper::generate_for_in_range(), &ram, &cpu);
 
-		cpu.define_program(seg_instr, seg_stack);
-		cpu.start_program();
-	}
 	std::cout << std::endl << std::endl;
-	if(true){
-		MachineCode code = MachineCodeHelper::generate_fibonacci();
-		udword seg_instr, seg_stack;
-		dword linker[] = { 44 };
 
-		ram.clean();
-		MachineCodeHelper::load_to_ram(&ram, &code, linker, seg_instr, seg_stack);
+	if(true)
+		startCode(MachineCodeHelper::generate_fibonacci(), &ram, &cpu);
 
-		cpu.define_program(seg_instr, seg_stack);
-		cpu.start_program();
-	}
+	std::cout << std::endl << std::endl;
+
+	out.change_mode(OutConsoleMode::Char, OutConsoleBetween::Nothing);
+	if(true)
+		startCode(MachineCodeHelper::generate_hello_world(), &ram, &cpu);
 
 	std::cout << std::endl;
 	std::cin.get();

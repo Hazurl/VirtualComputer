@@ -27,67 +27,67 @@ public:
 };
 
 
-ubyte lsb(uword w) {
-	return w & 0x00FF;
+static ubyte lsb(uword w) {
+	return w & 0xFF;
 }
 
-uword lsb(udword w) {
-	return 0x0000FFFF;
+static uword lsb(udword w) {
+	return w & 0xFFFF;
 }
 
-ubyte msb(uword w) {
-	return w & 0xFF00;
+static ubyte msb(uword w) {
+	return (w >> 8) & 0xFF;
 }
 
-uword msb(udword w) {
-	return 0xFFFF0000;
+static uword msb(udword w) {
+	return (w >> 16) & 0xFFFF;
 }
 
-inline ubyte lsb(word w) {
+static ubyte lsb(word w) {
 	return lsb(us_cast(w));
 }
 
-inline uword lsb(dword w) {
+static uword lsb(dword w) {
 	return lsb(us_cast(w));
 }
 
-inline ubyte msb(word w) {
+static ubyte msb(word w) {
 	return msb(us_cast(w));
 }
 
-inline uword msb(dword w) {
+static uword msb(dword w) {
 	return msb(us_cast(w));
 }
 
-uword join(ubyte h, ubyte l) {
+static uword join(ubyte h, ubyte l) {
 	return (static_cast<uword>(h) << 8 | l);
 }
 
-udword join(uword h, uword l) {
+static udword join(uword h, uword l) {
 	return (static_cast<udword>(h) << 16 | l);
 }
 
-inline uword join(byte h, byte l) {
+static uword join(byte h, byte l) {
 	return join(us_cast(h), us_cast(l));
 }
 
-inline udword join(word h, word l) {
+static udword join(word h, word l) {
 	return join(us_cast(h), us_cast(l));
 }
 
-inline uword join(ubyte h, byte l) {
+static uword join(ubyte h, byte l) {
 	return join(h, us_cast(l));
 }
 
-inline udword join(uword h, word l) {
+static udword join(uword h, word l) {
 	return join(h, us_cast(l));
 }
 
-inline uword join(byte h, ubyte l) {
+static uword join(byte h, ubyte l) {
 	return join(us_cast(h), l);
 }
 
-inline udword join(word h, uword l) {
+static udword join(word h, uword l) {
 	return join(us_cast(h), l);
 }
 

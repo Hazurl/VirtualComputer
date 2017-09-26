@@ -20,10 +20,8 @@ enum class ALUInstrSet : ubyte {
 	Neg8,		// 1 arg : -a
 	Inc8,		// 1 arg : a + 1 
 	Dec8,		// 1 arg : a - 1
-	LShift8,	// 1 arg : a << 1
-	RShift8,	// 1 arg : a >> 1
-	VLShift8,	// 2 arg : a << b
-	VRShift8,	// 2 arg : a >> b
+	LShift8,	// 1 arg : a << b
+	RShift8,	// 1 arg : a >> b
 	Comp8,		// 2 arg : a ? b
 	Comp08,		// 1 arg : a ? 0
 
@@ -35,10 +33,8 @@ enum class ALUInstrSet : ubyte {
 	Neg16,		// 1 arg : -a
 	Inc16,		// 1 arg : a + 1 
 	Dec16,		// 1 arg : a - 1
-	LShift16,	// 1 arg : a << 1
-	RShift16,	// 1 arg : a >> 1
-	VLShift16,	// 2 arg : a << b
-	VRShift16,	// 2 arg : a >> b
+	LShift16,	// 1 arg : a << b
+	RShift16,	// 1 arg : a >> b
 	Comp16,		// 2 arg : a ? b
 	Comp016,	// 1 arg : a ? 0
 
@@ -68,7 +64,7 @@ enum class InstrSet : uword {
 	Jmpl,		// args: addr_to_jmp
 	Jmplz,		// args: addr_to_jmp
 
-	Defer,
+	DeferData, DeferBss,
 	Comp, Comp0,
 	Add, Sub,
 	Mul, Div, Mod,
@@ -89,8 +85,7 @@ enum class InstrTarget : ubyte {
 	a8lh, b8lh, c8lh,
 	a8hl, b8hl, c8hl,
 
-	Addr,
-	Value,
+	AddrData, AddrBss, AddrInstr,
 };
 
 inline dword dwordv(InstrSet s) {

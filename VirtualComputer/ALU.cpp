@@ -12,7 +12,8 @@ ALU::ALU(const Bus8* CU, Bus8* flag, Bus32* output, const Bus32* inputA, const B
 }
 
 void ALU::process() {
-	switch(static_cast<ALUInstrSet>(CU->extract_8())) {
+	ALUInstrSet instr = static_cast<ALUInstrSet>(CU->extract_8());
+	switch(instr) {
 	case ALUInstrSet::Add32:
 	{
 		xdword a = static_cast<xdword>(inputA->extract_32());
@@ -95,24 +96,6 @@ void ALU::process() {
 	case ALUInstrSet::LShift32:
 	{
 		dword a = inputA->extract_32();
-		bool ovf = a & (1 << 1);
-		dword res = a << 1;
-		setflags(!res, res > 0, ovf, ovf);
-		output->bind_32(res);
-		break;
-	}
-	case ALUInstrSet::RShift32:
-	{
-		dword a = inputA->extract_32();
-		dword res = a >> 1;
-		bool ovf = a & 1;
-		setflags(!res, res > 0, ovf, !ovf);
-		output->bind_32(res);
-		break;
-	}
-	case ALUInstrSet::VLShift32:
-	{
-		dword a = inputA->extract_32();
 		dword b = inputB->extract_32();
 		dword res = a << b;
 		bool ovf = b > 31 || (a & ((~0) << b));
@@ -120,7 +103,7 @@ void ALU::process() {
 		output->bind_32(res);
 		break;
 	}
-	case ALUInstrSet::VRShift32:
+	case ALUInstrSet::RShift32:
 	{
 		dword a = inputA->extract_32();
 		dword b = inputB->extract_32();
@@ -225,24 +208,6 @@ void ALU::process() {
 	case ALUInstrSet::LShift16:
 	{
 		word a = inputA->extract_16();
-		bool ovf = a & (1 << 1);
-		word res = a << 1;
-		setflags(!res, res > 0, ovf, ovf);
-		output->bind_16(res);
-		break;
-	}
-	case ALUInstrSet::RShift16:
-	{
-		word a = inputA->extract_16();
-		word res = a >> 1;
-		bool ovf = a & 1;
-		setflags(!res, res > 0, ovf, !ovf);
-		output->bind_16(res);
-		break;
-	}
-	case ALUInstrSet::VLShift16:
-	{
-		word a = inputA->extract_16();
 		word b = inputB->extract_16();
 		word res = a << b;
 		bool ovf = b > 31 || (a & ((~0) << b));
@@ -250,7 +215,7 @@ void ALU::process() {
 		output->bind_16(res);
 		break;
 	}
-	case ALUInstrSet::VRShift16:
+	case ALUInstrSet::RShift16:
 	{
 		word a = inputA->extract_16();
 		word b = inputB->extract_16();
@@ -386,7 +351,7 @@ void ALU::process() {
 		break;
 	}
 	default:
-		throw ALUInstrSetUnknown(CU->extract_8());
+		throw ALUInstrSetUnknown((dword)instr);
 	};
 }
 

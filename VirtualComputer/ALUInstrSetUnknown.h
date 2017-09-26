@@ -9,12 +9,12 @@ BEGIN_NS
 class ALUInstrSetUnknown : std::exception {
 public:
 
-	byte is;
+	std::string str;
 
-	ALUInstrSetUnknown(byte is) : is(is) {}
+	ALUInstrSetUnknown(byte is) : str(std::string("Instruction unknown: ") + std::to_string((int)is)) {}
 
 	virtual const char* what() const throw() {
-		return (std::string("Instruction unknown: ") + std::to_string((int)is)).c_str();
+		return str.c_str();
 	}
 
 };

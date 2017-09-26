@@ -9,12 +9,12 @@ BEGIN_NS
 class InstrSetUnknown : std::exception {
 public:
 
-	dword is;
+	std::string str;
 
-	InstrSetUnknown(dword is) : is(is) {}
+	InstrSetUnknown(dword is) : str(std::string("Instruction unknown: ") + std::to_string((int)is)) {}
 
 	virtual const char* what() const throw() {
-		return (std::string("Instruction unknown: ") + std::to_string(is)).c_str();
+		return str.c_str();
 	}
 
 };
