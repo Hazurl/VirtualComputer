@@ -19,6 +19,7 @@ private:
 	};
 
 	Instruction nextInstr();
+	std::string nextToken();
 
 	std::string text;
 	unsigned int p = 0;

@@ -25,21 +25,45 @@ MachineCode::Generated Compiler::process() {
 
 Compiler::Instruction Compiler::nextInstr() {
 	Compiler::Instruction is;
-	char c;
-	std::string cur = "";
-	while (p < text.size() && (c = text[p++]) != '\n' && is.tokens.size()) {
-		if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == '-') {
-			cur += c;
-		}
-		else {
-			if (cur != "")
-				is.tokens.push_back(cur);
-			cur = "";
-		}
+	while (p < text.size()) {
+		char c = text[p]; 
+		if (c == '\n') {
+			if (is.tokens.size() > 0)
+				return is;
+			p++;
+		} 
+		else
+			is.tokens.push_back(nextToken());
 	}
-	if (cur != "")
-		is.tokens.push_back(cur);
 	return is;
+}
+
+std::string Compiler::nextToken() {
+	std::string s = "";
+	char c = text[p++];
+	if (c == '.' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == '-') {
+		s += c;
+		while (p < text.size() 
+			&& (c = text[p++], 
+			(c >= 'a' && c <= 'z' || 
+			 c >= 'A' && c <= 'Z' || 
+			 c == '_' || c == '-' || 
+			 c >= '0' && c <= '9' || c == '.')))
+			s += c;
+		return s;
+	}
+	if (c == '"') {
+		s += c;
+		while (p < text.size() && (c = text[p++], c != '"'))
+			s += c;
+		return s += c;
+	}
+	if (c == ',')
+		return s += c;
+	if (c == ':')
+		return s += c;
+
+	throw 42;
 }
 
 END_NS
