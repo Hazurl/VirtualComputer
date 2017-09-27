@@ -1,0 +1,25 @@
+segment data:
+	str b "hello world !", 0
+	endl b "\n"
+
+segment code:
+entry_point start
+
+start:
+	mov ebx, str
+
+begin_loop:
+	mov al, [ebx]
+	cmp al, 0
+	jz end_loop
+
+	out al
+	inc ebx
+	jmp begin_loop
+
+end_loop:
+
+	mov al, [endl]
+	out al
+	
+	hlt
