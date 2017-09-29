@@ -4,17 +4,17 @@
 
 #include <vphaz/Assembly/Compiler.h>
 
-int main()
-{
-	std::cout << "Enter filepath: " << std::endl;
-	std::string path;
-	std::cin >> path;
+int main(int argc, char** argv) {
+	if (argc < 2) {
+		std::cout << "Path needed in arguments" << std::endl;
+		return 1;
+	}
 
-	std::ifstream file(path);
+	std::ifstream file(argv[1]);
 	std::string text = "";
 
 	if (!file) {
-		std::cout << "File not found" << std::endl;
+		std::cout << "File not found: " << argv[1] << std::endl;
 		return 1;
 	}
 
@@ -29,9 +29,6 @@ int main()
 	Compiler c(text);
 
 	c.process();
-
-	std::cin.ignore();
-	std::cin.get();
 
     return 0;
 }

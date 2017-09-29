@@ -15,7 +15,7 @@ MachineCode::Generated Compiler::process() {
 
 	for (auto& is : iss) {
 		for (auto& s : is.tokens) {
-			std::cout << s << "//";
+			std::cout << s << " ";
 		}
 		std::cout << std::endl;
 	}
@@ -40,7 +40,11 @@ Compiler::Instruction Compiler::nextInstr() {
 
 std::string Compiler::nextToken() {
 	std::string s = "";
-	char c = text[p++];
+	char c;
+	while(p < text.size() && (c = text[p++], c == '\t' || c == '\n' || c == ' '));
+	if (p >= text.size())
+		return "";
+
 	if (c == '.' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
 		s += c;
 		while (p < text.size() 
@@ -49,6 +53,12 @@ std::string Compiler::nextToken() {
 			 (c >= 'A' && c <= 'Z') || 
 			 c == '_' || c == '-' || 
 			 (c >= '0' && c <= '9') || c == '.')))
+			s += c;
+		return s;
+	}
+	if (c >= '0' && c <= '9') {
+		s += c;
+		while(p < text.size() && (c = text[p++], c >= '0' && c <= '9'))
 			s += c;
 		return s;
 	}
@@ -62,7 +72,12 @@ std::string Compiler::nextToken() {
 		return s += c;
 	if (c == ':')
 		return s += c;
+	if (c == '[')
+		return s += c;
+	if (c == ']')
+		return s += c;
 
+	std::cout << c << std::endl;
 	throw 42;
 }
 

@@ -18,7 +18,7 @@ SRC := $(foreach d,$(SRC_DIR),$(wildcard $(d)/*.cpp))
 MAIN_DIR := src/
 # Main file 
 # Pick one : main_assembly.cpp main_virtualComputer.cpp
-MAIN := main_virtualComputer.cpp
+MAIN := main_assembly.cpp
 # Main path
 MAIN_PATH := $(MAIN_DIR)/$(MAIN)
 # Main .o
@@ -104,7 +104,7 @@ run: $(DEST)
 	@echo "      Run       "
 	@echo "----------------"
 	@echo -n "\033[0m"
-	@$(DEST)
+	@$(DEST) tests/$(file)
 	@echo -n "\033[34m"
 	@echo "----------------"
 	@echo "      Stop      "
