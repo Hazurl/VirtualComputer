@@ -2,6 +2,7 @@
 
 #include <vphaz/config.h>
 #include <vphaz/MachineCode/MachineCode.h>
+#include <vphaz/Assembly/Parser.h>
 
 #include <string>
 
@@ -15,16 +16,7 @@ public:
 
 private:
 
-	struct Instruction {
-		std::vector<std::string> tokens;
-	};
-
-	Instruction nextInstr();
-	std::string nextToken();
-
-	std::string text;
-	unsigned int p = 0;
-
+	Parser parser;
 };
 
 END_NS

@@ -10,11 +10,12 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	std::ifstream file(argv[1]);
+	std::string path = argv[1];
+	std::ifstream file(path);
 	std::string text = "";
 
 	if (!file) {
-		std::cout << "File not found: " << argv[1] << std::endl;
+		std::cout << "File not found: " << path << std::endl;
 		return 1;
 	}
 
