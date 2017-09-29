@@ -330,7 +330,7 @@ void CU::is_comp(InstrTarget t0, InstrTarget t1) {
 	processALU(t0, t1, ALU_IS(Comp), false);
 }
 
-void CU::is_comp0(InstrTarget t0, InstrTarget t1) {
+void CU::is_comp0(InstrTarget t0, InstrTarget) {
 	processALU(t0, ALU_IS(Comp0), false);
 }
 
@@ -354,15 +354,15 @@ void CU::is_mod(InstrTarget t0, InstrTarget t1) {
 	processALU(t0, t1, ALU_IS(Mod));
 }
 
-void CU::is_inc(InstrTarget t0, InstrTarget t1) {
+void CU::is_inc(InstrTarget t0, InstrTarget) {
 	processALU(t0, ALU_IS(Inc));
 }
 
-void CU::is_dec(InstrTarget t0, InstrTarget t1) {
+void CU::is_dec(InstrTarget t0, InstrTarget) {
 	processALU(t0, ALU_IS(Dec));
 }
 
-void CU::is_neg(InstrTarget t0, InstrTarget t1) {
+void CU::is_neg(InstrTarget t0, InstrTarget) {
 	processALU(t0, ALU_IS(Neg));
 }
 
@@ -374,7 +374,7 @@ void CU::is_rshift(InstrTarget t0, InstrTarget t1) {
 	processALU(t0, t1, ALU_IS(RShift));
 }
 
-void CU::is_push(InstrTarget t0, InstrTarget t1) {
+void CU::is_push(InstrTarget t0, InstrTarget) {
 	// write to addr bus
 	reg_seg_stack->write32();
 	reg_mem->read_write32();
@@ -391,7 +391,7 @@ void CU::is_push(InstrTarget t0, InstrTarget t1) {
 	instrAddrForward();
 }
 
-void CU::is_pop(InstrTarget t0, InstrTarget t1) {
+void CU::is_pop(InstrTarget t0, InstrTarget) {
 	// dec stack_ptr
 	reg_seg_stack->write32();
 	bus_alu->bind_8(bytev(ALUInstrSet::Dec32));
@@ -458,7 +458,7 @@ void CU::is_load(InstrTarget t0, InstrTarget t1) {
 	instrAddrForward();
 }
 
-void CU::is_store(InstrTarget t0, InstrTarget t1) {
+void CU::is_store(InstrTarget t0, InstrTarget) {
 	instrAddrForward();
 	if(t0 == InstrTarget::AddrData) {
 		fetch();
@@ -481,7 +481,7 @@ void CU::is_store(InstrTarget t0, InstrTarget t1) {
 	}
 }
 
-void CU::is_out(InstrTarget t0, InstrTarget t1) {
+void CU::is_out(InstrTarget t0, InstrTarget) {
 	if(is_reg(t0)) {
 		target_write(t0);
 		out->process();
@@ -509,7 +509,7 @@ void CU::is_out(InstrTarget t0, InstrTarget t1) {
 	instrAddrForward();
 }
 
-void CU::is_jmp(InstrTarget t0, InstrTarget t1, bool value) {
+void CU::is_jmp(InstrTarget t0, InstrTarget, bool value) {
 	instrAddrForward();
 	if(t0 == InstrTarget::AddrInstr) {
 		if(value) {

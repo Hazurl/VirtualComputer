@@ -41,14 +41,14 @@ Compiler::Instruction Compiler::nextInstr() {
 std::string Compiler::nextToken() {
 	std::string s = "";
 	char c = text[p++];
-	if (c == '.' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == '-') {
+	if (c == '.' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == '-') {
 		s += c;
 		while (p < text.size() 
 			&& (c = text[p++], 
-			(c >= 'a' && c <= 'z' || 
-			 c >= 'A' && c <= 'Z' || 
+			((c >= 'a' && c <= 'z') || 
+			 (c >= 'A' && c <= 'Z') || 
 			 c == '_' || c == '-' || 
-			 c >= '0' && c <= '9' || c == '.')))
+			 (c >= '0' && c <= '9') || c == '.')))
 			s += c;
 		return s;
 	}

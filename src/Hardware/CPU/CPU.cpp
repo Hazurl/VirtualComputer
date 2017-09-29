@@ -20,8 +20,8 @@ CPU::CPU(Bus32* bus_data, Bus32* bus_addr, MemoryControlFlow32* ram, Processable
 	reg_stack_ptr(bus_data, bus_data),
 	reg_seg_instr(bus_data, bus_data),
 	reg_seg_stack(bus_data, bus_data),
-	reg_seg_bss(bus_data, bus_data),
 	reg_seg_data(bus_data, bus_data),
+	reg_seg_bss(bus_data, bus_data),
 	alu(&bus_ALUCode, &bus_ALUflag, &bus_ALURes, bus_data, &bus_ALUTmp),
 	cu(ram, &alu, out, &reg_memory, &reg_flag, &bus_CUflag, &reg_instr, &bus_instr, &reg_instrAddr, &bus_ALUCode, 
 	   &reg_ALURes, &reg_ALUTmp, &reg_a, &reg_b, &reg_c, &reg_seg_instr, &reg_seg_stack, &reg_stack_ptr, &reg_seg_data, &reg_seg_bss)
