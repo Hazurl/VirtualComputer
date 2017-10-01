@@ -11,7 +11,7 @@ Compiler::Compiler(std::string const& text) : parser(text) {
 MachineCode::Generated Compiler::process() {
 	parser.tokenize();
 
-	return {};
+	return analyzer.analyze(parser.getTokens());
 }
 
 END_NS

@@ -116,6 +116,10 @@ inline byte bytev(ALUInstrSet s) {
 	return static_cast<byte>(s);
 }
 
+inline byte bytev(InstrTarget s) {
+	return static_cast<byte>(s);
+}
+
 inline byte bytev(ALUFlag s) {
 	return static_cast<byte>(s);
 }

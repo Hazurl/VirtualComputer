@@ -3,6 +3,7 @@
 #include <vphaz/config.h>
 #include <vphaz/MachineCode/MachineCode.h>
 #include <vphaz/Assembly/Parser.h>
+#include <vphaz/Assembly/Analyzer.h>
 
 #include <string>
 
@@ -17,6 +18,7 @@ public:
 private:
 
 	Parser parser;
+	Analyzer analyzer;
 };
 
 END_NS

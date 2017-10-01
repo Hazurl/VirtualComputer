@@ -65,8 +65,31 @@ Token Parser::getString() {
     std::string s = "";
     s += text[p++];
     char c = text[p];
-    while(p < text.size() && c != '"') {
-        s += c;
+    bool escape = false;
+    while(p < text.size() && (c != '"' || escape)) {
+        if (c == '\\') {
+            if (escape) {
+                s += c;
+                escape = false;
+            } else {
+                escape = true;
+            }
+            
+        } else if (escape) {
+            switch(c) {
+                case 'n' : s += '\n'; break; 
+                case 't' : s += '\t'; break; 
+                case 'r' : s += '\r'; break; 
+                case 'a' : s += '\a'; break; 
+                case '0' : s += '\0'; break;
+                case '"' : s += c; break; 
+                default:
+                    std::cout << "Escape unknown" << std::endl;
+            }
+            escape = false;
+        } else {
+            s += c;            
+        } 
         c = text[++p];
     }
     ++p;

@@ -13,11 +13,11 @@ class MachineCode {
 public:
 
 	struct Generated {
-		std::vector<dword> code;
-		std::vector<byte> data;
-		udword bss_size;
-		udword stack_size;
-		udword entry_point;
+		std::vector<dword> code = {};
+		std::vector<byte> data = {};
+		udword bss_size = 0;
+		udword stack_size = 0;
+		udword entry_point = 0;
 	};
 
 	Generated generate();

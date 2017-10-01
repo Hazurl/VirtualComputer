@@ -2,6 +2,10 @@ segment data:
 	str b "hello world !", 0
 	endl b "\n"
 
+segment bss:
+	bss_8 b 1
+	bss_64 w 4
+
 segment code:
 entry_point start
 
