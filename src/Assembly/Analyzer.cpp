@@ -6,6 +6,31 @@
 BEGIN_NS_ASS
 
 MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
+    this->tokens = &tokens;
+    tsize = tokens.size();
+    p = 0;
+    code = MachineCode::Generated();
+
+    label_pos.clear();
+    data_pos.clear();
+    bss_pos.clear();
+    
+    segment_bss();
+    if (!good())
+        return {};
+/*
+    segment_data();
+    if (!good())
+        return {};
+
+    segment_code();
+    if (!good())
+        return {};
+*/
+    return code;
+}
+/*
+MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     MachineCode::Generated code;
 
     p = 0;
@@ -24,10 +49,10 @@ MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     while(p < tokens_size) {
         auto ts = getLine();
         unsigned int s = ts.size();
-/*
+
         for(auto& t : ts) std::cout << t.raw << ", ";
         std::cout << std::endl;
-*/
+
         // segment entry "segment code:"
         if (s == 3 && ts[0].type == TokenType::Ident && ts[0].raw == "segment" &&
             ts[1].type == TokenType::Ident &&
@@ -113,14 +138,15 @@ MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     std::cout << "BSS: " << code.bss_size << " bytes (" << code.bss_size * 8 << " bits)" << std::endl;
     return code;
 }
-
-std::vector<Token> Analyzer::getLine() {
-    std::vector<Token> ts;
-    const unsigned int line = (*tokens)[p].line;
-    while(p < tokens_size && line == (*tokens)[p].line) ts.push_back((*tokens)[p++]);
-    return ts;
+*/
+void Analyzer::getLine() {
+    const unsigned int l = (*tokens)[p].line;
+    line.clear();
+    while(p < tsize && l == (*tokens)[p].line) line.push_back((*tokens)[p++]);
+    pl = 0;
+    lsize = line.size();
 }
-
+/*
 void Analyzer::segment_code(MachineCode::Generated& code, std::vector<Token> const& ts) {
     unsigned int s = ts.size();
     // label
@@ -228,45 +254,48 @@ void Analyzer::segment_code(MachineCode::Generated& code, std::vector<Token> con
         }
     }
 }
+*/
+void Analyzer::segment_bss() {
+    getLine();
+    eat(TokenType::Ident, "segment");
+    eat(TokenType::Ident, "bss");
+    eat(TokenType::Colon);
+    checkEndInstr();
 
-void Analyzer::segment_bss(MachineCode::Generated& code, std::vector<Token> const& ts) {
-    unsigned int s = ts.size();
-    if (s != 3) {
-        std::cout << "Not enough arguments" << std::endl;
-        return;
-    } 
-    if (ts[0].type != TokenType::Ident) {
-        std::cout << "Expected a name" << std::endl;
-        return;
-    }
-    bss_pos.emplace(ts[0].raw, code.bss_size);
-    if (ts[1].type != TokenType::Ident) {
-        std::cout << "Expected a type" << std::endl;
-        return;
-    }
-    std::string type = ts[1].raw;
-    unsigned int size_type;
-    if (type == "dw") size_type = 4;
-    else if (type == "w") size_type = 2;
-    else if (type == "b") size_type = 1;
-    else {
-        std::cout << "Type unknown" << std::endl;
-        return;
-    }
-    if(ts[2].type == TokenType::Number) {
-        int n = std::atoi(ts[2].raw.c_str());
-        if (n <= 0) {
-            std::cout << "Cannot reserve a negative or null size" << std::endl;
-            return;
-        }
-        code.bss_size += size_type * n;
-        std::cout << "# " << size_type << "*" << n << " added to BSS segment" << std::endl;
-    } else {
-        std::cout << "Expected a number" << std::endl;
-        return;
+    getLine();
+    if (!good()) return;
+
+    while(p < tsize && line[pl].raw != "segment") {
+        if (lsize != 3)
+            return abord("BSS Segment : Not nough arguments");
+
+        eat(TokenType::Ident);
+        if (!good()) return;
+        bss_pos.emplace(line[pl-1].raw, code.bss_size);
+
+        eat(TokenType::Ident);
+        if (!good()) return;
+        std::string type = line[pl-1].raw;
+
+        unsigned int size_type;
+        if (type == "dw") size_type = 4;
+        else if (type == "w") size_type = 2;
+        else if (type == "b") size_type = 1;
+        else return abord("Type unknown");
+        eat(TokenType::Number);
+        if (!good()) return;
+
+        int n = std::atoi(line[pl-1].raw.c_str()) * size_type;
+        if (n <= 0) abord("Cannot reserve a negative size of byte");
+        code.bss_size += n;
+        std::cout << "# " << size_type << "*" << n / size_type << " (" << n * 8 << " bytes) added to BSS segment" << std::endl;
+        checkEndInstr();
+
+        getLine();
+        if (!good()) return;
     }
 }
-
+/*
 void Analyzer::segment_data(MachineCode::Generated& code, std::vector<Token> const& ts) {
     unsigned int s = ts.size();
     if (s <= 2) {
@@ -331,17 +360,63 @@ void Analyzer::segment_data(MachineCode::Generated& code, std::vector<Token> con
         return;
     }
 }
-
-void Analyzer::add(MachineCode::Generated& code, InstrSet is, InstrTarget t0, InstrTarget t1) {
+*/
+void Analyzer::add(InstrSet is, InstrTarget t0, InstrTarget t1) {
     code.code.push_back((wordv(is) << 16) | (bytev(t0) << 8) | bytev(t1));    
 }
 
-void Analyzer::add(MachineCode::Generated& code, InstrSet is, InstrTarget t0) {
+void Analyzer::add(InstrSet is, InstrTarget t0) {
     code.code.push_back((wordv(is) << 16) | (bytev(t0) << 8));
 }
 
-void Analyzer::add(MachineCode::Generated& code, InstrSet is) {
+void Analyzer::add(InstrSet is) {
     code.code.push_back(wordv(is) << 16);
+}
+
+void Analyzer::eat(TokenType type) {
+    if (pl >= lsize) {
+        error = "Expected " + std::to_string(static_cast<int>(type)) + " and got nothing";
+        return;
+    }
+    Token t = line[pl];
+    if (t.type != type) {
+        error = "Expected : " + std::to_string(static_cast<int>(type)) + " and get " + std::to_string(static_cast<int>(t.type));        
+    }
+//    std::cout << "Eat " << t.raw << std::endl;
+    pl++;
+}
+
+void Analyzer::eat(TokenType type, std::string const& raw) {
+    if (pl >= lsize) {
+        error = "Expected " + std::to_string(static_cast<int>(type)) + " and got nothing";
+        return;
+    }
+    Token t = line[pl];
+    if (t.type != type) {
+        error = "Expected Tokentype : " + std::to_string(static_cast<int>(type)) + " and get " + std::to_string(static_cast<int>(t.type));        
+    }
+    if (t.raw != raw) {
+        error = "Expected : " + raw + " and get " + t.raw;        
+    }
+//    std::cout << "Eat " << raw << std::endl;
+    pl++;
+}
+
+bool Analyzer::good() const {
+    return error == "";
+}
+
+std::string Analyzer::getError() const {
+    return error;
+}
+
+void Analyzer::checkEndInstr() {
+    if (pl < lsize)
+        error = "Expected end of instruction";
+}
+
+void Analyzer::abord(std::string const& err) {
+    error = err;
 }
 
 END_NS_ASS

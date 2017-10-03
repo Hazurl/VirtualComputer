@@ -21,11 +21,11 @@ bool Parser::tokenize() {
     return good();
 }
 
-std::string getError() const {
+std::string Parser::getError() const {
     return error;
 }
 
-bool good() const {
+bool Parser::good() const {
     return error == "";
 }
 
@@ -57,7 +57,7 @@ Token Parser::getNextToken() {
         return getString();
         
     error = "Error at " + std::to_string(p) + " '" + std::to_string(c) + "'";
-    return Token(TokenType::Unknown, "");
+    return Token(TokenType::Unknown, "", line);
 }
 
 bool Parser::is_letter(char c) const {
@@ -92,7 +92,7 @@ Token Parser::getString() {
                 case '"' : s += c; break; 
                 default:
                     error = "Escape unknown";
-                    return Token(TokenType::Unknown, "");
+                    return Token(TokenType::Unknown, "", line);
             }
             escape = false;
         } else {
@@ -134,4 +134,4 @@ void Parser::passBlank() {
     }
 }
 
-END_NS
+END_NS_ASS

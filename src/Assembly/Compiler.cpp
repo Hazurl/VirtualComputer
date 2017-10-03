@@ -16,7 +16,12 @@ MachineCode::Generated Compiler::process() {
 		return {};
 	}
 
-	return analyzer.analyze(parser.getTokens());
+	auto code = analyzer.analyze(parser.getTokens());
+	if (!analyzer.good()) {
+		std::cout << "Analyzer Error: " << analyzer.getError() << std::endl;
+		return {};
+	}
+	return code;
 }
 
 END_NS_ASS

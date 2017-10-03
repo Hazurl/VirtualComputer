@@ -14,24 +14,34 @@ class Analyzer {
 public:
     
     MachineCode::Generated analyze(std::vector<Token> const& tokens);
-
+    bool good() const;
+    std::string getError() const; 
+       
 private:
 
-    void segment_code(MachineCode::Generated& code, std::vector<Token> const& ts);
-    void segment_bss(MachineCode::Generated& code, std::vector<Token> const& ts);
-    void segment_data(MachineCode::Generated& code, std::vector<Token> const& ts);
+    void segment_code();
+    void segment_bss();
+    void segment_data();
     
-    void add(MachineCode::Generated& code, InstrSet is, InstrTarget t0, InstrTarget t1);
-    void add(MachineCode::Generated& code, InstrSet is, InstrTarget t0);
-    void add(MachineCode::Generated& code, InstrSet is);
+    void add(InstrSet is, InstrTarget t0, InstrTarget t1);
+    void add(InstrSet is, InstrTarget t0);
+    void add(InstrSet is);
 
-    std::vector<Token> getLine();
+    void getLine();
 
-    unsigned int p;
-    unsigned int tokens_size;
+    void eat(TokenType type);
+    void eat(TokenType type, std::string const& raw);
+
+    void checkEndInstr();
+    void abord(std::string const& err);
+    std::string error = "";
+
+    MachineCode::Generated code;
+
     const std::vector<Token>* tokens;
-
-    std::string entry_point_label = "";
+    std::vector<Token> line;
+    unsigned int p, pl;
+    unsigned int tsize, lsize;
     
     std::map<std::string, unsigned int> label_pos;
     std::map<std::string, unsigned int> data_pos;
