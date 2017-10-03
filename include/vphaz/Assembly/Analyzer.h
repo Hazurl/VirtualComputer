@@ -29,11 +29,11 @@ private:
 
     void getLine();
 
-    void eat(TokenType type);
-    void eat(TokenType type, std::string const& raw);
+    Token eat(TokenType type);
+    Token eat(TokenType type, std::string const& raw);
 
     void checkEndInstr();
-    void abord(std::string const& err);
+    void report(std::string const& err);
     std::string error = "";
 
     MachineCode::Generated code;

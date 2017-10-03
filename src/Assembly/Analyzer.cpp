@@ -15,14 +15,18 @@ MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     data_pos.clear();
     bss_pos.clear();
     
-    segment_bss();
-    if (!good())
-        return {};
-/*
-    segment_data();
+    getLine();
     if (!good())
         return {};
 
+    segment_bss();
+    if (!good())
+        return {};
+
+    segment_data();
+    if (!good())
+        return {};
+/*
     segment_code();
     if (!good())
         return {};
@@ -145,6 +149,11 @@ void Analyzer::getLine() {
     while(p < tsize && l == (*tokens)[p].line) line.push_back((*tokens)[p++]);
     pl = 0;
     lsize = line.size();
+/*
+    std::cout << "LINE {";
+    for (auto& t : line) std::cout << t.raw << ", ";
+    std::cout << "}" << std::endl;
+*/
 }
 /*
 void Analyzer::segment_code(MachineCode::Generated& code, std::vector<Token> const& ts) {
@@ -256,7 +265,6 @@ void Analyzer::segment_code(MachineCode::Generated& code, std::vector<Token> con
 }
 */
 void Analyzer::segment_bss() {
-    getLine();
     eat(TokenType::Ident, "segment");
     eat(TokenType::Ident, "bss");
     eat(TokenType::Colon);
@@ -266,101 +274,96 @@ void Analyzer::segment_bss() {
     if (!good()) return;
 
     while(p < tsize && line[pl].raw != "segment") {
-        if (lsize != 3)
-            return abord("BSS Segment : Not nough arguments");
+        auto addr = eat(TokenType::Ident);
+        auto type = eat(TokenType::Ident);
+        auto size_request = eat(TokenType::Number);
 
-        eat(TokenType::Ident);
+        checkEndInstr();
+        getLine();
         if (!good()) return;
-        bss_pos.emplace(line[pl-1].raw, code.bss_size);
+        
+        bss_pos.emplace(addr.raw, code.bss_size);
 
-        eat(TokenType::Ident);
-        if (!good()) return;
-        std::string type = line[pl-1].raw;
+        std::string rawtype = type.raw;
 
         unsigned int size_type;
-        if (type == "dw") size_type = 4;
-        else if (type == "w") size_type = 2;
-        else if (type == "b") size_type = 1;
-        else return abord("Type unknown");
-        eat(TokenType::Number);
-        if (!good()) return;
+        if (rawtype == "dw") size_type = 4;
+        else if (rawtype == "w") size_type = 2;
+        else if (rawtype == "b") size_type = 1;
+        else return report("Type unknown");
 
-        int n = std::atoi(line[pl-1].raw.c_str()) * size_type;
-        if (n <= 0) abord("Cannot reserve a negative size of byte");
+        int n = std::atoi(size_request.raw.c_str()) * size_type;
+        if (n <= 0) report("Cannot reserve a negative size of byte");
         code.bss_size += n;
-        std::cout << "# " << size_type << "*" << n / size_type << " (" << n * 8 << " bytes) added to BSS segment" << std::endl;
-        checkEndInstr();
 
+        std::cout << "# " << size_type << "*" << n / size_type << " (" << n * 8 << " bytes) added to BSS segment" << std::endl;
+        if (!good()) return;
+    }
+}
+
+void Analyzer::segment_data() {
+    eat(TokenType::Ident, "segment");
+    eat(TokenType::Ident, "data");
+    eat(TokenType::Colon);
+    checkEndInstr();
+
+    getLine();
+    if (!good()) return;
+
+    while(p < tsize && line[pl].raw != "segment") {
+        auto addr = eat(TokenType::Ident);
+        auto type = eat(TokenType::Ident);
+
+        data_pos.emplace(addr.raw, code.data.size());
+        std::string rawtype = type.raw;
+        unsigned int size_type;
+        if (rawtype == "dw") size_type = 4;
+        else if (rawtype == "w") size_type = 2;
+        else if (rawtype == "b") size_type = 1;
+        else return report("Type unknown");
+
+        bool expect_value = true;
+        while (pl < lsize) {
+            auto t = line[pl++];
+            if (!expect_value) {
+                if (t.type != TokenType::Comma)
+                    report("Expected a comma");
+                expect_value = true;
+
+            } else if (t.type == TokenType::Number) {
+                int n = std::atoi(t.raw.c_str());
+                if (n == 0 && t.raw[0] != '0')
+                    report("Invalid Value");
+
+                // set each byte
+                for (unsigned int _s = 0; _s < size_type; ++_s)
+                    code.data.push_back((n >> (size_type - _s - 1)) & 0xFF);
+
+                std::cout << "# Data added :" << n << std::endl; 
+                expect_value = false;
+
+            } else if (t.type == TokenType::String) {
+                for (unsigned int j = 1; j < t.raw.size() - 1; ++j) {
+                    // char are only 1 byte, but user can change it to more, so we fill with 0
+                    for (unsigned int _s = 0; _s < size_type - 1 ; ++_s)
+                        code.data.push_back(0);
+
+                    char c = t.raw[j];
+                    code.data.push_back(c);
+                    std::cout << "# Data added :" << (int)c << " (" << c << ")" << std::endl; 
+                }
+                expect_value = false;
+            }
+        }
+        if (expect_value)
+            report("Expected a value");
+
+        checkEndInstr();
         getLine();
         if (!good()) return;
     }
 }
-/*
-void Analyzer::segment_data(MachineCode::Generated& code, std::vector<Token> const& ts) {
-    unsigned int s = ts.size();
-    if (s <= 2) {
-        std::cout << "Arguments missing in data segment" << std::endl;
-        return;
-    }
-    if(ts[0].type != TokenType::Ident) {
-        std::cout << "Expected a name" << std::endl;
-        return;
-    }
-    data_pos.emplace(ts[0].raw, code.data.size());
-    if (ts[1].type != TokenType::Ident) {
-        std::cout << "Expected a type" << std::endl;
-        return;
-    }
-    std::string type = ts[1].raw;
-    unsigned int size_type;
-    if (type == "dw") size_type = 4;
-    else if (type == "w") size_type = 2;
-    else if (type == "b") size_type = 1;
-    else {
-        std::cout << "Type unknown" << std::endl;
-        return;
-    }
 
-    bool expect_comma = false;
-    for (unsigned int i = 2; i < ts.size(); ++i) {
-        auto t = ts[i];
-        if (expect_comma) {
-            if (t.type != TokenType::Comma) {
-                std::cout << "Expected a comma" << std::endl;
-                return;
-            }
-            expect_comma = false;
-            continue;
-        }
-        if (t.type == TokenType::Number) {
-            int n = std::atoi(t.raw.c_str());
-            if (n == 0 && t.raw[0] != '0') {
-                std::cout << "Invalid number" << std::endl;
-                return;
-            }
-            for (unsigned int _s = 0; _s < size_type; ++_s) {
-                code.data.push_back((n >> (size_type - _s - 1)) & 0xFF);
-            }
-            std::cout << "# Data added :" << n << std::endl; 
-            expect_comma = true;
-        } else if (t.type == TokenType::String) {
-            for (unsigned int j = 1; j < t.raw.size() - 1; ++j) {
-                for (unsigned int _s = 0; _s < size_type - 1 ; ++_s) {
-                    code.data.push_back(0);
-                }
-                char c = t.raw[j];
-                code.data.push_back(c);
-                std::cout << "# Data added :" << (int)c << " (" << c << ")" << std::endl; 
-            }
-            expect_comma = true;
-        }
-    }
-    if (!expect_comma) {
-        std::cout << "Expected a value" << std::endl;
-        return;
-    }
-}
-*/
 void Analyzer::add(InstrSet is, InstrTarget t0, InstrTarget t1) {
     code.code.push_back((wordv(is) << 16) | (bytev(t0) << 8) | bytev(t1));    
 }
@@ -373,33 +376,27 @@ void Analyzer::add(InstrSet is) {
     code.code.push_back(wordv(is) << 16);
 }
 
-void Analyzer::eat(TokenType type) {
+Token Analyzer::eat(TokenType type) {
     if (pl >= lsize) {
-        error = "Expected " + std::to_string(static_cast<int>(type)) + " and got nothing";
-        return;
+        report("Expected Type::" + std::to_string(static_cast<int>(type)) + " and got nothing");
+        return Token(type, "", 0);
     }
     Token t = line[pl];
     if (t.type != type) {
-        error = "Expected : " + std::to_string(static_cast<int>(type)) + " and get " + std::to_string(static_cast<int>(t.type));        
+        report("Expected : Type::" + std::to_string(static_cast<int>(type)) + " and got Type::" + std::to_string(static_cast<int>(t.type)));        
     }
 //    std::cout << "Eat " << t.raw << std::endl;
     pl++;
+    return t;
 }
 
-void Analyzer::eat(TokenType type, std::string const& raw) {
-    if (pl >= lsize) {
-        error = "Expected " + std::to_string(static_cast<int>(type)) + " and got nothing";
-        return;
-    }
-    Token t = line[pl];
-    if (t.type != type) {
-        error = "Expected Tokentype : " + std::to_string(static_cast<int>(type)) + " and get " + std::to_string(static_cast<int>(t.type));        
-    }
+Token Analyzer::eat(TokenType type, std::string const& raw) {
+    auto t = eat(type);
     if (t.raw != raw) {
-        error = "Expected : " + raw + " and get " + t.raw;        
+        report("Expected : " + raw + " and got " + t.raw);        
     }
 //    std::cout << "Eat " << raw << std::endl;
-    pl++;
+    return t;
 }
 
 bool Analyzer::good() const {
@@ -412,11 +409,14 @@ std::string Analyzer::getError() const {
 
 void Analyzer::checkEndInstr() {
     if (pl < lsize)
-        error = "Expected end of instruction";
+        report("Expected end of instruction");
 }
 
-void Analyzer::abord(std::string const& err) {
-    error = err;
+void Analyzer::report(std::string const& err) {
+    if (good())
+        error = err;
+    else
+        error += "; " + err;
 }
 
 END_NS_ASS
