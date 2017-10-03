@@ -29,6 +29,9 @@ MAIN_OBJ := $(patsubst %.cpp,build/main/%.o,$(MAIN))
 ##############################################
 # Name of the executable
 DEST := build/main_app
+# Arguments
+ARGS := tests/hello.hasm
+MORE_ARGS :=
 # Build Directories
 BUILD_DIR := build build/main build/src $(addprefix build/src/,$(SRC_DIR)) $(addprefix build/deps/,$(SRC_DIR))
 # .o files
@@ -104,7 +107,7 @@ run: $(DEST)
 	@echo "      Run       "
 	@echo "----------------"
 	@echo -n "\033[0m"
-	@$(DEST) tests/$(file)
+	@$(DEST) $(ARGS) $(MORE_ARGS)
 	@echo -n "\033[34m"
 	@echo "----------------"
 	@echo "      Stop      "
@@ -126,7 +129,7 @@ valgrind: $(DEST)
 	@echo "  Run Valgrind  "
 	@echo "----------------"
 	@echo -n "\033[0m"
-	@valgrind --leak-check=full --show-leak-kinds=all $(DEST)
+	@valgrind --leak-check=full --show-leak-kinds=all $(DEST) $(ARGS) $(MORE_ARGS)
 	@echo -n "\033[34m"
 	@echo "----------------"
 	@echo "      Stop      "

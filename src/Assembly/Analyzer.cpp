@@ -11,6 +11,7 @@ MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     p = 0;
     code = MachineCode::Generated();
 
+    entry_point_label = "";
     label_pos.clear();
     data_pos.clear();
     bss_pos.clear();
@@ -26,123 +27,14 @@ MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     segment_data();
     if (!good())
         return {};
-/*
+
     segment_code();
     if (!good())
         return {};
-*/
+
     return code;
 }
-/*
-MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
-    MachineCode::Generated code;
 
-    p = 0;
-    this->tokens = &tokens;
-    tokens_size = tokens.size();
-
-    const int SEG_CODE = 1;
-    const int SEG_DATA = 2;
-    const int SEG_BSS = 3;
-
-    int current_seg = 0;
-    bool has_seg_code = false;
-    bool has_seg_data = false;
-    bool has_seg_bss = false;
-
-    while(p < tokens_size) {
-        auto ts = getLine();
-        unsigned int s = ts.size();
-
-        for(auto& t : ts) std::cout << t.raw << ", ";
-        std::cout << std::endl;
-
-        // segment entry "segment code:"
-        if (s == 3 && ts[0].type == TokenType::Ident && ts[0].raw == "segment" &&
-            ts[1].type == TokenType::Ident &&
-            ts[2].type == TokenType::Colon) {
-
-            switch(current_seg) {
-            case SEG_BSS:
-                has_seg_bss = true;
-                break;
-            case SEG_DATA:
-                has_seg_data = true;
-                break;
-            case SEG_CODE:
-                has_seg_code = true;
-                break;
-            default: break;
-            }
-                
-            auto seg = ts[1].raw;
-            if (seg == "data") {
-                if (has_seg_data) {
-                    std::cout << "Data segment already defined" << std::endl;
-                    return code;
-                } else {
-                    current_seg = SEG_DATA;
-                    std::cout << std::endl << "# Start Segment Data" << std::endl;
-                }
-            } else if (seg == "code") {
-                if (has_seg_code) {
-                    std::cout << "Code segment already defined" << std::endl;
-                    return code;
-                } else {
-                    current_seg = SEG_CODE;
-                    std::cout << std::endl << "# Start Segment Code" << std::endl;
-                }
-            } else if (seg == "bss") {
-                if (has_seg_bss) {
-                    std::cout << "BSS segment already defined" << std::endl;
-                    return code;
-                } else {
-                    current_seg = SEG_BSS;
-                    std::cout << std::endl << "# Start Segment BSS" << std::endl;
-                }
-            } else {
-                std::cout << "Segment unknown" << std::endl;
-                return code;
-            }
-            continue;
-        }
-
-        if (current_seg == SEG_CODE) {
-            segment_code(code, ts);
-        }
-
-        if (current_seg == SEG_BSS) {
-            segment_bss(code, ts);
-        }
-
-        if (current_seg == SEG_DATA) {
-            segment_data(code, ts);
-        }
-    }
-    std::cout << std::endl;
-
-    if (entry_point_label == "") {
-        std::cout << "Link error, can't find an entry_point" << std::endl;
-    } else {
-        auto it = label_pos.find(entry_point_label);
-        if (it == label_pos.end()) {
-            std::cout << "Link error, this label doesn't exists \"" << entry_point_label << "\"" << std::endl;
-        } else {
-            std::cout << "# Entry point: " << it->second << std::endl;
-            code.entry_point = it->second;
-        }
-    }
-
-    std::cout << "Data: ";
-    for (auto d : code.data) {
-        std::cout << (int)d << " (" << d << ") ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "BSS: " << code.bss_size << " bytes (" << code.bss_size * 8 << " bits)" << std::endl;
-    return code;
-}
-*/
 void Analyzer::getLine() {
     const unsigned int l = (*tokens)[p].line;
     line.clear();
@@ -155,115 +47,129 @@ void Analyzer::getLine() {
     std::cout << "}" << std::endl;
 */
 }
-/*
-void Analyzer::segment_code(MachineCode::Generated& code, std::vector<Token> const& ts) {
-    unsigned int s = ts.size();
-    // label
-    if (s == 2 && ts[0].type == TokenType::Ident && ts[1].type == TokenType::Colon) {
-        label_pos.emplace(ts[0].raw, code.code.size());
-        std::cout << "# Add label: " << ts[0].raw << std::endl;
-        return;
+
+void Analyzer::segment_code() {
+    eat(TokenType::Ident, "segment");
+    eat(TokenType::Ident, "code");
+    eat(TokenType::Colon);
+    checkEndInstr();
+
+    getLine();
+    if (!good()) return;
+
+    entry_point_label = "";
+
+    while((p + pl) < tsize && line[pl].raw != "segment") {
+        auto t = eat(TokenType::Ident);
+        
+        if (lsize == 2 && t.type == TokenType::Ident && line[1].type == TokenType::Colon) {
+            label_pos.emplace(t.raw, code.code.size());
+            std::cout << "# Add label: " << t.raw << std::endl;
+            eat(TokenType::Colon);
+        
+        } else if (lsize == 2 && t.type == TokenType::Ident && t.raw == "entry_point" && line[1].type == TokenType::Ident) {
+            entry_point_label = eat(TokenType::Ident).raw;
+            std::cout << "# add entry point : " << entry_point_label << std::endl;
+        
+        } else if (t.raw == "hlt") {
+            add(InstrSet::Halt);
+            std::cout << "# Add Instruction Halt" << std::endl;
+        
+        } else if (t.raw == "mov") {
+            TargetType ltype, rtype;
+            Token lhs = eatTarget(ltype);
+            eat(TokenType::Comma);
+            Token rhs = eatTarget(rtype);
+
+            switch(ltype) {
+            case TargetType::Register: {
+                switch(rtype) {
+                case TargetType::Register: {
+                    add(InstrSet::Move, targetRegisterOf(t0), targetRegisterOf(t1));
+                }   
+                case TargetType::Addr: {
+                    dword addr = findAddressOf(rhs.raw);
+                    add(InstrSet::Move, targetRegisterOf(t0), InstrTarget::Addr);
+                    add(addr);
+                }
+                case TargetType::Value: {
+                    
+                }
+                }
+            }
+            case TargetType::Addr: {
+                switch(rtype) {
+                    case TargetType::Register: {
+                        
+                    }   
+                    case TargetType::Addr:
+                    case TargetType::Value:
+                        report("Mov: One of the operant must be a register");
+                        break;
+                    }
+                }
+            case TargetType::Value: {
+                switch(rtype) {
+                    case TargetType::Register: {
+                        report("Mov: The l-value must be an address or a register");
+                        break;
+                    }
+                }
+            }
+
+
+                if (rtype != TargetType::Register) { // l is reg, r is value or addr
+                    auto it_data = data_pos.find(rhs.raw);
+                    bool it_data_valid = (it_data != data_pos.end());
+
+                    auto it_bss = bss_pos.find(rhs.raw);
+                    bool it_bss_valid = (it_bss != bss_pos.end());
+
+                    bool is_reg = isRegisterName(rhs.raw);
+                    
+                    if (!is_reg) {
+                        if (!it_bss_valid && !it_data_valid) {
+                            report("Can't find this address label");
+                        } else if (it_bss_valid && it_data_valid) {
+                            report("Name conflict between data and bss adress label");
+                        }
+
+                        add(InstrSet::Move, targetRegisterOf(lhs.raw), InstrTarget::Addr);
+                        add(it_data_valid ? it_data->second : it_bss->second);
+                        std::cout << "# Add Instruction Move reg -> addr" << std::endl;
+                    } else {
+                        add(InstrSet::Defer, targetRegisterOf(lhs.raw), targetRegisterOf(rhs.raw));
+                        std::cout << "# Add Instruction Defer [reg] -> reg" << std::endl;
+                    }
+                } else { // r is reg or value
+                    if (l_is_addr) { // reg -> [reg] or reg -> [addr] 
+
+                    } else { // reg -> reg
+                        add(InstrSet::Move, targetRegisterOf(lhs.raw), targetRegisterOf(rhs.raw));
+                        std::cout << "# Add Instruction Move reg -> reg" << std::endl;
+                    }
+                }
+            }
+
+        } else 
+            report("Unknown command");
+        checkEndInstr();
+        getLine();
+        if (!good()) break;
     }
 
-    // entry_point "entry_point mylabel"
-    if (entry_point_label == "" && s == 2 && ts[0].type == TokenType::Ident && ts[0].raw == "entry_point" &&
-        ts[1].type == TokenType::Ident) {
-        entry_point_label = ts[1].raw;
-        return;
-    }
-
-    if (ts[0].type == TokenType::Ident) {
-        std::string cmd = ts[0].raw;
-        if (cmd == "mov") {
-            if(s < 4) {
-                std::cout << "Not enough arguments" << std::endl;
-                return;
-            }
-            std::string a, b;
-            bool addr0 = false, addr1 = false;
-            if (ts[1].type == TokenType::LBracket) {
-                addr0 = true;
-                if (s < 5 || ts[2].type != TokenType::Ident || ts[3].type != TokenType::RBracket || ts[4].type != TokenType::Comma) {
-                    std::cout << "Can't resolve mov command" << std::endl;
-                    return;
-                }
-                a = ts[2].raw;
-                if (ts[5].type == TokenType::LBracket) {
-                    addr1 = true;
-                    if (s != 8 || ts[6].type != TokenType::Ident || ts[7].type != TokenType::RBracket) {
-                        std::cout << "Can't resolve mov command" << std::endl;
-                        return;
-                    }
-                    b = ts[6].raw;
-                } else {
-                    if (s != 6 || ts[5].type != TokenType::Ident) {
-                        std::cout << "Can't resolve mov command" << std::endl;
-                        return;
-                    }
-                    b = ts[5].raw;
-                }   
-            } else {
-                if (s < 4 || ts[1].type != TokenType::Ident || ts[2].type != TokenType::Comma) {
-                    std::cout << "Can't resolve mov command" << std::endl;
-                    return;
-                }
-                a = ts[1].raw;
-                if (ts[3].type == TokenType::LBracket) {
-                    addr1 = true;
-                    if (s != 6 || ts[4].type != TokenType::Ident || ts[5].type != TokenType::RBracket) {
-                        std::cout << "Can't resolve mov command" << std::endl;
-                        return;
-                    }
-                    b = ts[5].raw;
-                } else {
-                    if (s != 4 || ts[3].type != TokenType::Ident) {
-                        std::cout << "Can't resolve mov command" << std::endl;
-                        return;
-                    }
-                    b = ts[3].raw;
-                }   
-            }
-
-            
-
-        } else if (cmd == "hlt") {
-            if (s != 1) {
-                std::cout << "Halt don't need any arguments" << std::endl;
-                return;
-            }
-            add(code, InstrSet::Halt);
-            std::cout << "# Add Halt command" << std::endl;
-            return;
-        }  else if (cmd == "add") {
-
-        } else if (cmd == "cmp") {
-
-        } else if (cmd == "mul") {
-
-        } else if (cmd == "div") {
-
-        } else if (cmd == "sub") {
-
-        } else if (cmd == "jmp") {
-
-        } else if (cmd == "jz") {
-
-        } else if (cmd == "jl") {
-
-        } else if (cmd == "jg") {
-
-        } else if (cmd == "jge") {
-
-        } else if (cmd == "jle") {
-
-        } else if (cmd == "out") {
-
-        } else if (cmd == "inc") {
-
+    if (entry_point_label == "") {
+        report("No entry point");
+    } else {
+        auto it = label_pos.find(entry_point_label);
+        if (it == label_pos.end()) {
+            report("Cannot find entry_point label");
+        } else {
+            code.entry_point = it->second;
         }
     }
 }
-*/
+
 void Analyzer::segment_bss() {
     eat(TokenType::Ident, "segment");
     eat(TokenType::Ident, "bss");
@@ -281,6 +187,9 @@ void Analyzer::segment_bss() {
         checkEndInstr();
         getLine();
         if (!good()) return;
+
+        if (isRegisterName(addr.raw))
+            return report("this label address name is reserved by a register");
         
         bss_pos.emplace(addr.raw, code.bss_size);
 
@@ -313,6 +222,9 @@ void Analyzer::segment_data() {
     while(p < tsize && line[pl].raw != "segment") {
         auto addr = eat(TokenType::Ident);
         auto type = eat(TokenType::Ident);
+
+        if (isRegisterName(addr.raw))
+            return report("this label address name is reserved by a register");
 
         data_pos.emplace(addr.raw, code.data.size());
         std::string rawtype = type.raw;
@@ -373,7 +285,11 @@ void Analyzer::add(InstrSet is, InstrTarget t0) {
 }
 
 void Analyzer::add(InstrSet is) {
-    code.code.push_back(wordv(is) << 16);
+    code.code.push_back(dwordv(is) << 16);
+}
+
+void Analyzer::add(dword dw) {
+    code.code.push_back(dw);
 }
 
 Token Analyzer::eat(TokenType type) {
@@ -399,6 +315,27 @@ Token Analyzer::eat(TokenType type, std::string const& raw) {
     return t;
 }
 
+Token Analyzer::eatRegister() {
+    return eat(TokenType::Ident);
+}
+
+Token Analyzer::eatAddress() {
+    eat(TokenType::LBracket);
+    auto t = eat(TokenType::Ident);
+    eat(TokenType::RBracket);
+    return t;
+}
+
+Token Analyzer::eatTarget(TargetType& type) {
+    if (line[pl].type == TokenType::LBracket) {
+        type = TargetType::Addr;
+        return eatAddress();
+    } else {
+        auto t = eatRegister();
+        type = isRegisterName(t) ? TargetType::Register : TargetType::Value;
+    }
+}
+
 bool Analyzer::good() const {
     return error == "";
 }
@@ -417,6 +354,53 @@ void Analyzer::report(std::string const& err) {
         error = err;
     else
         error += "; " + err;
+}
+
+InstrTarget Analyzer::targetRegisterOf(std::string const& reg) {
+    if (reg == "eax") return InstrTarget::a32;
+    if (reg == "aw") return InstrTarget::a16;
+    if (reg == "ah") return InstrTarget::a8lh;
+    if (reg == "al") return InstrTarget::a8;
+
+    if (reg == "ebx") return InstrTarget::b32;
+    if (reg == "bw") return InstrTarget::b16;
+    if (reg == "bh") return InstrTarget::b8lh;
+    if (reg == "bl") return InstrTarget::b8;
+
+    if (reg == "ecx") return InstrTarget::c32;
+    if (reg == "cw") return InstrTarget::c16;
+    if (reg == "ch") return InstrTarget::c8lh;
+    if (reg == "cl") return InstrTarget::c8;
+
+    report("Register unknown : " + reg);
+    return InstrTarget::a32;
+}
+
+bool Analyzer::isRegisterName(std::string const& reg) {
+    if (reg == "eax" || reg == "aw" || reg == "ah" || reg == "al") return true;
+    if (reg == "ebx" || reg == "bw" || reg == "bh" || reg == "bl") return true;
+    if (reg == "ecx" || reg == "cw" || reg == "ch" || reg == "cl") return true;
+    return false;
+}
+
+dword Analyzer::findAddressOf(std::string const& label) {
+    auto it_d = data_pos.find(label);
+    auto it_b = bss_pos.find(label);
+    if (it_b == bss_pos.end()) {
+        if (it_d == data_pos.end()) {
+            report("There is no address label called " + label);
+            return 0;
+        } else {
+            return it_d->second;
+        }
+    } else {
+        if (it_d == data_pos.end()) {
+            return it_b->second;
+        } else {
+            report("Conflict between data and bss label");
+            return 0;
+        }
+    }
 }
 
 END_NS_ASS
