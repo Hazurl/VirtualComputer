@@ -4,8 +4,12 @@
 #include <cstdint>
 
 #define NAMESPACE vphaz
-#define BEGIN_NS namespace vphaz {
+#define BEGIN_NS namespace NAMESPACE {
 #define END_NS }
+
+#define NAMESPACE_ASS assembly
+#define BEGIN_NS_ASS BEGIN_NS namespace NAMESPACE_ASS {
+#define END_NS_ASS } END_NS
 
 BEGIN_NS
 

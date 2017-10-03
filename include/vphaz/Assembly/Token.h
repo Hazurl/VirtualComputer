@@ -3,7 +3,7 @@
 #include <vphaz/config.h>
 #include <string>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 enum class TokenType {
     Number, String, Ident,
@@ -23,4 +23,4 @@ struct Token {
     
 };
 
-END_NS
+END_NS_ASS

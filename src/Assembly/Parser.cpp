@@ -1,7 +1,7 @@
 #include <vphaz/Assembly/Parser.h>
 #include <iostream>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 Parser::Parser(std::string const& text) : text(text) {
 
@@ -14,12 +14,19 @@ bool Parser::tokenize() {
 
     while(p < text.size()) {
         Token t = getNextToken();
-        if (t.type == TokenType::Unknown)
-            return p < text.size();
+        if (!good()) return false;
         tokens.push_back(t);
     }
 
-    return true;
+    return good();
+}
+
+std::string getError() const {
+    return error;
+}
+
+bool good() const {
+    return error == "";
 }
 
 std::vector<Token> Parser::getTokens() const {
@@ -44,13 +51,13 @@ Token Parser::getNextToken() {
 
     if (is_digit(c))
         return getNumber();
-    if (is_letter(c) || c == '_' || c == '-')
+    if (is_letter(c) || c == '_')
         return getIdent();
     if (c == '"')
         return getString();
         
-    std::cout << "Error at " << p << " '" << c << "'" << std::endl;
-    throw 42;
+    error = "Error at " + std::to_string(p) + " '" + std::to_string(c) + "'";
+    return Token(TokenType::Unknown, "");
 }
 
 bool Parser::is_letter(char c) const {
@@ -84,7 +91,8 @@ Token Parser::getString() {
                 case '0' : s += '\0'; break;
                 case '"' : s += c; break; 
                 default:
-                    std::cout << "Escape unknown" << std::endl;
+                    error = "Escape unknown";
+                    return Token(TokenType::Unknown, "");
             }
             escape = false;
         } else {

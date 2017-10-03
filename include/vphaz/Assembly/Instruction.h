@@ -7,7 +7,7 @@
 #include <vphaz/Assembly/Token.h>
 #include <vphaz/Hardware/CPU/InstrSet.h>
 
-BEGIN_NS
+BEGIN_NS_ASS
 /*
 Instruction mov_is("mov")
     .match(Pattern::Reg, Pattern::DataBssAddr)  .output(InstrSet::Load, Target::DataBssAddr)
@@ -82,4 +82,4 @@ private:
 
 };
 
-END_NS
+END_NS_ASS

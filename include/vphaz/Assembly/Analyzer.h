@@ -8,7 +8,7 @@
 #include <map>
 #include <string>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 class Analyzer {
 public:
@@ -39,4 +39,4 @@ private:
 
 };
 
-END_NS
+END_NS_ASS

@@ -3,7 +3,7 @@
 #include <map>
 #include <iostream>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 MachineCode::Generated Analyzer::analyze(std::vector<Token> const& tokens) {
     MachineCode::Generated code;
@@ -344,4 +344,4 @@ void Analyzer::add(MachineCode::Generated& code, InstrSet is) {
     code.code.push_back(wordv(is) << 16);
 }
 
-END_NS
+END_NS_ASS

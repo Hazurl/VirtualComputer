@@ -5,7 +5,7 @@
 #include <vector>
 #include <vphaz/Assembly/Token.h>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 class Parser {
 public:
@@ -15,6 +15,9 @@ public:
 
     std::vector<Token> getTokens() const;
 
+    std::string getError() const;    
+    bool good() const;
+    
 private:
 
     Token getNextToken();
@@ -32,6 +35,7 @@ private:
     std::vector<Token> tokens;
     unsigned int p;
     unsigned int line;
+    std::string error = "";
 };
 
-END_NS
+END_NS_ASS

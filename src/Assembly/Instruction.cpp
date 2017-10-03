@@ -2,7 +2,7 @@
 #include <cassert>
 #include <vphaz/Bin.h>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 using namespace assemblyInstruction;
 

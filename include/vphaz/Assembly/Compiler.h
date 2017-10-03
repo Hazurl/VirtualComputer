@@ -7,7 +7,7 @@
 
 #include <string>
 
-BEGIN_NS
+BEGIN_NS_ASS
 
 class Compiler {
 public:
@@ -21,4 +21,4 @@ private:
 	Analyzer analyzer;
 };
 
-END_NS
+END_NS_ASS

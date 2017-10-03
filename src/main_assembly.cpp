@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 		text += line + '\n';
 	}
 
-	using namespace NAMESPACE;
+	using namespace NAMESPACE::NAMESPACE_ASS;
 
 	Compiler c(text);
 
