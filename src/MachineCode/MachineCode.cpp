@@ -17,7 +17,7 @@ MachineCode::Generated MachineCode::generate() {
 			g.code.emplace_back(i.cmd);
 			break;
 		case Instr::State::label:
-			labels.emplace(i.cmd, (g.code.size() - 1) * sizeof(dword));
+			labels.emplace(i.cmd, (g.code.size() - 1) * sizeof(dword) + wanted_bss_size + data.size());
 			break;
 		case Instr::State::label_addr:
 			auto it = labels.find(i.cmd);
@@ -41,7 +41,7 @@ MachineCode::Generated MachineCode::generate() {
 	g.stack_size = wanted_stack_size;
 	g.bss_size = wanted_bss_size;
 	g.data = data;
-	g.entry_point = 0;
+	g.entry_point = wanted_bss_size + data.size();
 	return g;
 }
 

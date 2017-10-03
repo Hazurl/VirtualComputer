@@ -11,7 +11,7 @@ class CPU {
 public:
 	CPU(Bus32* bus_data, Bus32* bus_addr, MemoryControlFlow32* ram, Processable* out);
 
-	void define_program(udword segment_instr, udword segment_data, udword segment_bss, udword segment_stack, udword entry_point);
+	void define_program(udword segment_mem, udword segment_stack, udword entry_point);
 	void start_program();
 
 private:
@@ -39,8 +39,6 @@ private:
 
 	Register32 reg_seg_instr;
 	Register32 reg_seg_stack;
-	Register32 reg_seg_data;
-	Register32 reg_seg_bss;
 
 	ALU alu;
 	CU cu;

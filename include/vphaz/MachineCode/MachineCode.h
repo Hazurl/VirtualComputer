@@ -45,7 +45,7 @@ private:
 			label_addr
 		};
 		State state;
-		dword cmd;
+		dword cmd;	
 
 		Instr(State s, dword b);
 	};

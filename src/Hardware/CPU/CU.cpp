@@ -7,7 +7,7 @@ BEGIN_NS
 CU::CU(MemoryControlFlow32* ram, Processable* alu, Processable* out, MemoryControlFlow32* reg_mem, MemoryControlFlow8* reg_flag, Bus8 * bus_flag, 
 	   MemoryControlFlow32* reg_instr, Bus32* bus_instr, MemoryControlFlow32 * reg_instr_addr, Bus8 * bus_alu, MemoryControlFlow32 * reg_alu_res,
 	   MemoryControlFlow32 * reg_alu_tmp, MemoryControlFlow32 * reg_a, MemoryControlFlow32 * reg_b, MemoryControlFlow32 * reg_c,
-	   MemoryControlFlow32* reg_seg_instr, MemoryControlFlow32* reg_seg_stack, MemoryControlFlow32* reg_stack_ptr, MemoryControlFlow32* reg_seg_data, MemoryControlFlow32* reg_seg_bss)
+	   MemoryControlFlow32* reg_seg_instr, MemoryControlFlow32* reg_seg_stack, MemoryControlFlow32* reg_stack_ptr)
   : alu(alu),
 	out(out),
 	ram(ram),
@@ -25,9 +25,7 @@ CU::CU(MemoryControlFlow32* ram, Processable* alu, Processable* out, MemoryContr
 	reg_c(reg_c),
 	reg_seg_instr(reg_seg_instr),
 	reg_seg_stack(reg_seg_stack),
-	reg_stack_ptr(reg_stack_ptr),
-	reg_seg_data(reg_seg_data),
-	reg_seg_bss(reg_seg_bss)
+	reg_stack_ptr(reg_stack_ptr)
 {
 
 }
@@ -39,6 +37,8 @@ void CU::process() {
 	word instrp = bin::msb(instr);
 	byte instrs = bin::msb(bin::lsb(instr));
 	byte instrt = bin::lsb(bin::lsb(instr));
+
+//	std::cout << "IS: " << instr << " -> " << instrp << "-" << (int)instrs << "-" << (int)instrt << std::endl;
 
 	InstrSet is = static_cast<InstrSet>(instrp);
 	InstrTarget t0 = static_cast<InstrTarget>(instrs);
@@ -55,12 +55,10 @@ void CU::process() {
 
 	case InstrSet::Push: is_push(t0, t1); break;
 	case InstrSet::Pop: is_pop(t0, t1); break;
-	case InstrSet::Load: is_load(t0, t1); break;
-	case InstrSet::Store: is_store(t0, t1); break;
+	case InstrSet::Move: is_move(t0, t1); break;
 	case InstrSet::Out: is_out(t0, t1); break;
 
-	case InstrSet::DeferData: is_deferdata(t0, t1); break;
-	case InstrSet::DeferBss: is_deferbss(t0, t1); break;
+	case InstrSet::Defer: is_defer(t0, t1); break;
 	case InstrSet::Add: is_add(t0, t1); break;
 	case InstrSet::Sub: is_sub(t0, t1); break;
 	case InstrSet::Mul: is_mul(t0, t1); break;
@@ -84,21 +82,11 @@ void CU::process() {
 void CU::processALU(InstrTarget t0, InstrTarget t1, ALUInstrSet b8, ALUInstrSet b16, ALUInstrSet b32, bool result) {
 	if(is_reg(t1)) {
 		target_write(t1);
-	} else if(t1 == InstrTarget::AddrData) {
+	} else if(t1 == InstrTarget::Addr) {
 		instrAddrForward();
 		fetch();
 		reg_alu_tmp->read_write32();
-		reg_seg_data->write32();
-		bus_alu->bind_8(bytev(ALUInstrSet::Add32));
-		alu->process();
-		reg_alu_res->read_write32();
-		reg_mem->read_write32();
-		ram->write32();
-	} else if(t1 == InstrTarget::AddrBss) {
-		instrAddrForward();
-		fetch();
-		reg_alu_tmp->read_write32();
-		reg_seg_bss->write32();
+		reg_seg_instr->write32();
 		bus_alu->bind_8(bytev(ALUInstrSet::Add32));
 		alu->process();
 		reg_alu_res->read_write32();
@@ -179,9 +167,8 @@ bool CU::is_not_flag(ALUFlag f) {
 
 bool CU::is_reg(InstrTarget t) {
 	switch(t) {
-	case vphaz::InstrTarget::AddrData:
-	case vphaz::InstrTarget::AddrBss:
-	case vphaz::InstrTarget::AddrInstr:
+	case vphaz::InstrTarget::Addr:
+	case vphaz::InstrTarget::Value:
 		return false;
 	default:
 		return true;
@@ -190,18 +177,18 @@ bool CU::is_reg(InstrTarget t) {
 
 void CU::target_read(InstrTarget t) {
 	switch(t) {
-	case vphaz::InstrTarget::a32: reg_a->read32(); break;
-	case vphaz::InstrTarget::b32:	reg_b->read32(); break;
-	case vphaz::InstrTarget::c32: reg_c->read32(); break;
-	case vphaz::InstrTarget::a16: reg_a->read16(); break;
-	case vphaz::InstrTarget::b16: reg_b->read16(); break;
-	case vphaz::InstrTarget::c16: reg_c->read16(); break;
+	case vphaz::InstrTarget::a32:  reg_a->read32(); break;
+	case vphaz::InstrTarget::b32:  reg_b->read32(); break;
+	case vphaz::InstrTarget::c32:  reg_c->read32(); break;
+	case vphaz::InstrTarget::a16:  reg_a->read16(); break;
+	case vphaz::InstrTarget::b16:  reg_b->read16(); break;
+	case vphaz::InstrTarget::c16:  reg_c->read16(); break;
 	case vphaz::InstrTarget::a16h: reg_a->read16h(); break;
 	case vphaz::InstrTarget::b16h: reg_b->read16h(); break;
 	case vphaz::InstrTarget::c16h: reg_c->read16h(); break;
-	case vphaz::InstrTarget::a8: reg_a->read8(); break;
-	case vphaz::InstrTarget::b8: reg_b->read8(); break;
-	case vphaz::InstrTarget::c8: reg_c->read8(); break;
+	case vphaz::InstrTarget::a8:   reg_a->read8(); break;
+	case vphaz::InstrTarget::b8:   reg_b->read8(); break;
+	case vphaz::InstrTarget::c8:   reg_c->read8(); break;
 	case vphaz::InstrTarget::a8hh: reg_a->read8hh(); break;
 	case vphaz::InstrTarget::b8hh: reg_b->read8hh(); break;
 	case vphaz::InstrTarget::c8hh: reg_c->read8hh(); break;
@@ -218,18 +205,18 @@ void CU::target_read(InstrTarget t) {
 
 void CU::target_write(InstrTarget t) {
 	switch(t) {
-	case vphaz::InstrTarget::a32: reg_a->write32(); break;
-	case vphaz::InstrTarget::b32:	reg_b->write32(); break;
-	case vphaz::InstrTarget::c32: reg_c->write32(); break;
-	case vphaz::InstrTarget::a16: reg_a->write16(); break;
-	case vphaz::InstrTarget::b16: reg_b->write16(); break;
-	case vphaz::InstrTarget::c16: reg_c->write16(); break;
+	case vphaz::InstrTarget::a32:  reg_a->write32(); break;
+	case vphaz::InstrTarget::b32:  reg_b->write32(); break;
+	case vphaz::InstrTarget::c32:  reg_c->write32(); break;
+	case vphaz::InstrTarget::a16:  reg_a->write16(); break;
+	case vphaz::InstrTarget::b16:  reg_b->write16(); break;
+	case vphaz::InstrTarget::c16:  reg_c->write16(); break;
 	case vphaz::InstrTarget::a16h: reg_a->write16h(); break;
 	case vphaz::InstrTarget::b16h: reg_b->write16h(); break;
 	case vphaz::InstrTarget::c16h: reg_c->write16h(); break;
-	case vphaz::InstrTarget::a8: reg_a->write8(); break;
-	case vphaz::InstrTarget::b8: reg_b->write8(); break;
-	case vphaz::InstrTarget::c8: reg_c->write8(); break;
+	case vphaz::InstrTarget::a8:   reg_a->write8(); break;
+	case vphaz::InstrTarget::b8:   reg_b->write8(); break;
+	case vphaz::InstrTarget::c8:   reg_c->write8(); break;
 	case vphaz::InstrTarget::a8hh: reg_a->write8hh(); break;
 	case vphaz::InstrTarget::b8hh: reg_b->write8hh(); break;
 	case vphaz::InstrTarget::c8hh: reg_c->write8hh(); break;
@@ -269,9 +256,8 @@ ubyte CU::target_size(InstrTarget t) {
 	case vphaz::InstrTarget::a32:
 	case vphaz::InstrTarget::b32:
 	case vphaz::InstrTarget::c32:
-	case vphaz::InstrTarget::AddrData:
-	case vphaz::InstrTarget::AddrBss:
-	case vphaz::InstrTarget::AddrInstr:
+	case vphaz::InstrTarget::Addr:
+	case vphaz::InstrTarget::Value:
 		return 32;
 	default:
 		throw InstrSetUnknown(static_cast<dword>(t));
@@ -280,33 +266,10 @@ ubyte CU::target_size(InstrTarget t) {
 
 #define ALU_IS(n) ALUInstrSet::n ## 8, ALUInstrSet::n ## 16, ALUInstrSet::n ## 32 
 
-void CU::is_deferdata(InstrTarget t0, InstrTarget t1) {
+void CU::is_defer(InstrTarget t0, InstrTarget t1) {
 	target_write(t0);
 	reg_alu_tmp->read_write32();
-	reg_seg_data->write32();
-	bus_alu->bind_8(bytev(ALUInstrSet::Add32));
-	alu->process();
-	reg_alu_res->read_write32();
-	reg_mem->read_write32();
-	switch(target_size(t1)) {
-	case 32:
-		ram->write32();
-		break;
-	case 16:
-		ram->write16();
-		break;
-	case 8:
-		ram->write8();
-		break;
-	}
-	target_read(t1);
-	instrAddrForward();
-}
-
-void CU::is_deferbss(InstrTarget t0, InstrTarget t1) {
-	target_write(t0);
-	reg_alu_tmp->read_write32();
-	reg_seg_bss->write32();
+	reg_seg_instr->write32();
 	bus_alu->bind_8(bytev(ALUInstrSet::Add32));
 	alu->process();
 	reg_alu_res->read_write32();
@@ -408,60 +371,45 @@ void CU::is_pop(InstrTarget t0, InstrTarget) {
 	instrAddrForward();
 }
 
-void CU::is_load(InstrTarget t0, InstrTarget t1) {
+void CU::is_move(InstrTarget t1, InstrTarget t0) { // move from t1 to t0
 	if(is_reg(t1)) {
-		target_write(t1);
-	} else if(t1 == InstrTarget::AddrData) {
+		if (is_reg(t0)) {
+			target_write(t0);
+			target_read(t1);
+		} else if (t0 == InstrTarget::Value) {
+			instrAddrForward();
+			fetch();
+			target_read(t1);
+		} else if (t0 == InstrTarget::Addr) {
+			instrAddrForward();
+			fetch();
+			reg_alu_tmp->read_write32();
+			reg_seg_instr->write32();
+			bus_alu->bind_8(bytev(ALUInstrSet::Add32));
+			alu->process();
+			reg_alu_res->read_write32();
+			reg_mem->read_write32();
+			switch(target_size(t1)) {
+			case 32:
+				ram->write32();
+				break;
+			case 16:
+				ram->write16();
+				break;
+			case 8:
+				ram->write8();
+				break;
+			}
+			target_read(t1);
+		}
+	} else if(t1 == InstrTarget::Addr && is_reg(t0)) {
 		instrAddrForward();
 		fetch();
 		reg_alu_tmp->read_write32();
-		reg_seg_data->write32();
+		reg_seg_instr->write32();
 		bus_alu->bind_8(bytev(ALUInstrSet::Add32));
 		alu->process();
 		reg_alu_res->read_write32();
-		reg_mem->read_write32();
-		switch(target_size(t0)) {
-		case 32:
-			ram->write32();
-			break;
-		case 16:
-			ram->write16();
-			break;
-		case 8:
-			ram->write8();
-			break;
-		}
-	} else if(t1 == InstrTarget::AddrBss) {
-		instrAddrForward();
-		fetch();
-		reg_alu_tmp->read_write32();
-		reg_seg_bss->write32();
-		bus_alu->bind_8(bytev(ALUInstrSet::Add32));
-		alu->process();
-		reg_alu_res->read_write32();
-		reg_mem->read_write32();
-		switch(target_size(t0)) {
-		case 32:
-			ram->write32();
-			break;
-		case 16:
-			ram->write16();
-			break;
-		case 8:
-			ram->write8();
-			break;
-		}
-	} else {
-		throw ALUInstrSetUnknown(static_cast<dword>(t0));
-	}
-	target_read(t0);
-	instrAddrForward();
-}
-
-void CU::is_store(InstrTarget t0, InstrTarget) {
-	instrAddrForward();
-	if(t0 == InstrTarget::AddrData) {
-		fetch();
 		reg_mem->read_write32();
 		target_write(t0);
 		switch(target_size(t0)) {
@@ -475,43 +423,40 @@ void CU::is_store(InstrTarget t0, InstrTarget) {
 			ram->read8();
 			break;
 		}
-		instrAddrForward();
 	} else {
-		throw ALUInstrSetUnknown(static_cast<dword>(t0));
+		throw InstrSetUnknown(static_cast<word>(t0) << 16 | static_cast<word>(t1));
 	}
+	instrAddrForward();
 }
 
 void CU::is_out(InstrTarget t0, InstrTarget) {
 	if(is_reg(t0)) {
 		target_write(t0);
 		out->process();
-	} else if(t0 == InstrTarget::AddrData) {
+	} else if(t0 == InstrTarget::Addr) {
 		instrAddrForward();
 		fetch();
 		reg_alu_tmp->read_write32();
-		reg_seg_data->write32();
+		reg_seg_instr->write32();
 		bus_alu->bind_8(bytev(ALUInstrSet::Add32));
 		alu->process();
 		reg_alu_res->read_write32();
+		reg_mem->read_write32();
+		ram->write32();
 		out->process();
-	} else if(t0 == InstrTarget::AddrBss) {
+	} else if(t0 == InstrTarget::Value) {
 		instrAddrForward();
 		fetch();
-		reg_alu_tmp->read_write32();
-		reg_seg_bss->write32();
-		bus_alu->bind_8(bytev(ALUInstrSet::Add32));
-		alu->process();
-		reg_alu_res->read_write32();
 		out->process();
 	} else {
-		throw ALUInstrSetUnknown(static_cast<dword>(t0));
+		throw InstrSetUnknown(static_cast<dword>(t0));
 	}
 	instrAddrForward();
 }
 
 void CU::is_jmp(InstrTarget t0, InstrTarget, bool value) {
 	instrAddrForward();
-	if(t0 == InstrTarget::AddrInstr) {
+	if(t0 == InstrTarget::Value) {
 		if(value) {
 			fetch();
 			reg_alu_tmp->read_write32();
@@ -523,8 +468,22 @@ void CU::is_jmp(InstrTarget t0, InstrTarget, bool value) {
 		} else {
 			instrAddrForward();
 		}
+	} else if (t0 == InstrTarget::Addr) {
+		if(value) {
+			fetch();
+			reg_alu_tmp->read_write32();
+			reg_seg_instr->write32();
+			bus_alu->bind_8(bytev(ALUInstrSet::Add32));
+			alu->process();
+			reg_alu_res->read_write32();
+			reg_mem->read_write32();
+			ram->write32();
+			reg_instr_addr->read32();
+		} else {
+			instrAddrForward();
+		}		
 	} else {
-		throw ALUInstrSetUnknown(static_cast<dword>(t0));
+		throw InstrSetUnknown(static_cast<dword>(t0));
 	}
 }
 

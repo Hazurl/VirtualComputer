@@ -64,7 +64,7 @@ enum class InstrSet : uword {
 	Jmpl,		// args: addr_to_jmp
 	Jmplz,		// args: addr_to_jmp
 
-	DeferData, DeferBss,
+	Defer,
 	Comp, Comp0,
 	Add, Sub,
 	Mul, Div, Mod,
@@ -72,7 +72,7 @@ enum class InstrSet : uword {
 	Neg, 
 	LShift, RShift,
 	Push, Pop,
-	Load, Store,
+	Move,
 	Out
 };
 
@@ -85,7 +85,7 @@ enum class InstrTarget : ubyte {
 	a8lh, b8lh, c8lh,
 	a8hl, b8hl, c8hl,
 
-	AddrData, AddrBss, AddrInstr,
+	Addr, Value,
 };
 
 inline dword dwordv(InstrSet s) {
